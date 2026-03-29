@@ -1,782 +1,284 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeShare - 安全分享秘密</title>
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <!-- 自定义CSS -->
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #ff9e00;
-            --light: #f8f9fa;
-            --dark: #212529;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding-bottom: 60px;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-        
-        .hero-section {
-            background: linear-gradient(rgba(67, 97, 238, 0.9), rgba(58, 12, 163, 0.9));
-            color: white;
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .main-card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            overflow: hidden;
-            background: white;
-            margin-bottom: 30px;
-        }
-        
-        .card-header {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            color: white;
-            font-weight: 600;
-            border: none;
-            padding: 20px;
-        }
-        
-        .form-control, .form-select {
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            padding: 12px 15px;
-            transition: all 0.3s;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
-        }
-        
-        .secret-textarea {
-            min-height: 150px;
-            font-family: 'Courier New', monospace;
-            background-color: #f8f9fa;
-            resize: vertical;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
-        }
-        
-        .btn-success {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
-            border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-        }
-        
-        .feature-card {
-            border: none;
-            border-radius: 15px;
-            padding: 30px 20px;
-            text-align: center;
-            transition: all 0.3s;
-            height: 100%;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
-        
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .password-strength {
-            height: 5px;
-            border-radius: 2px;
-            margin-top: 5px;
-            transition: all 0.3s;
-        }
-        
-        .result-card {
-            animation: slideUp 0.5s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .footer {
-            background: var(--dark);
-            color: white;
-            padding: 30px 0;
-            margin-top: 60px;
-        }
-        
-        .copy-btn {
-            border-radius: 0 10px 10px 0;
-        }
-        
-        .expiry-options .btn-check:checked + .btn {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-        
-        .alert {
-            border-radius: 10px;
-            border: none;
-        }
-    </style>
-</head>
-<body>
-    <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <i class="fas fa-shield-alt me-2"></i>SafeShare
-            </a>
-            <div class="d-flex">
-                <a href="view.html" class="btn btn-outline-light me-2">
-                    <i class="fas fa-eye me-1"></i>查看秘密
-                </a>
-                <a href="https://github.com/yourusername/SafeShare" target="_blank" class="btn btn-light">
-                    <i class="fab fa-github me-1"></i>GitHub
-                </a>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <!-- 主内容 -->
-    <div class="container mt-4">
-        <!-- 英雄区域 -->
-        <div class="hero-section">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold">安全分享敏感信息</h1>
-                    <p class="lead">端到端加密，阅后即焚，保护你的密码、密钥和机密信息</p>
-                    <div class="d-flex flex-wrap gap-2 mt-4">
-                        <span class="badge bg-light text-dark p-2">
-                            <i class="fas fa-lock me-1"></i>端到端加密
-                        </span>
-                        <span class="badge bg-light text-dark p-2">
-                            <i class="fas fa-fire me-1"></i>阅后即焚
-                        </span>
-                        <span class="badge bg-light text-dark p-2">
-                            <i class="fas fa-clock me-1"></i>自动过期
-                        </span>
-                        <span class="badge bg-light text-dark p-2">
-                            <i class="fas fa-user-secret me-1"></i>匿名使用
-                        </span>
-                    </div>
-                </div>
-                <div class="col-lg-4 text-center d-none d-lg-block">
-                    <i class="fas fa-shield-alt" style="font-size: 8rem; opacity: 0.8;"></i>
+{% block content %}
+<div class="container">
+    <!-- 顶部标题区（内容丰富） -->
+    <div class="text-center mb-5">
+        <h1>🌿 莫奈的秘密花园</h1>
+        <p class="lead">把心事藏进油画里，让温柔守护你的秘密</p>
+        <div class="decor-text">✨ 隐秘分享 · 时光封存 · 温柔倾诉 ✨</div>
+        <div class="mt-4">
+            <span class="badge bg-light text-dark p-3 me-3"><i class="fa fa-paint-brush me-1"></i>水彩油画风</span>
+            <span class="badge bg-light text-dark p-3 me-3"><i class="fa fa-lock me-1"></i>本地隐私加密</span>
+            <span class="badge bg-light text-dark p-3"><i class="fa fa-heart me-1"></i>治愈系交互</span>
+        </div>
+    </div>
+
+    <!-- 温馨提示栏 -->
+    <div class="alert alert-light border rounded-4 text-center mb-5">
+        <i class="fa fa-info-circle me-2"></i> 所有秘密仅存储在你的设备中，绝对安全，无需担心泄露
+    </div>
+
+    <!-- 核心功能：秘密分享 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fa fa-paper-plane me-2"></i> 创建你的私密分享</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <label class="form-label fw-bold">✍️ 写下你的秘密 / 心事 / 寄语</label>
+                <textarea class="form-control" id="secretText" rows="4" maxlength="2000" placeholder="在这里写下你想守护的一切..."></textarea>
+                <div class="form-text d-flex justify-content-between mt-2">
+                    <span>支持 2000 字以内内容</span>
+                    <span><span id="charCount">0</span>/2000</span>
                 </div>
             </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">🔒 设置访问密码</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="passcode" placeholder="请设置 4 位以上密码">
+                        <button class="btn btn-outline-secondary" id="togglePassword"><i class="fa fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">🔒 确认访问密码</label>
+                    <input type="password" class="form-control" id="confirmPasscode" placeholder="再次输入密码">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">⏳ 选择过期模式</label>
+                <div class="btn-group w-100">
+                    <input type="radio" class="btn-check" name="expiry" id="expiry1" value="1" checked>
+                    <label class="btn btn-outline-primary" for="expiry1">阅后即焚</label>
+                    <input type="radio" class="btn-check" name="expiry" id="expiry24" value="24">
+                    <label class="btn btn-outline-primary" for="expiry24">24小时有效</label>
+                    <input type="radio" class="btn-check" name="expiry" id="expiry168" value="168">
+                    <label class="btn btn-outline-primary" for="expiry168">7天有效</label>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button id="generateBtn" class="btn btn-primary btn-lg"><i class="fa fa-shield-alt me-2"></i> 生成安全分享链接</button>
+            </div>
         </div>
+    </div>
 
-        <!-- 主表单 -->
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="main-card">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="fas fa-paper-plane me-2"></i>创建新秘密</h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <!-- 秘密内容 -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-key me-1"></i>秘密内容
-                                <span class="text-muted fw-normal">（最大2000字符）</span>
-                            </label>
-                            <textarea 
-                                class="form-control secret-textarea" 
-                                id="secretText" 
-                                rows="5" 
-                                placeholder="输入你要分享的密码、API密钥、银行卡号或其他敏感信息..."
-                                maxlength="2000"
-                            ></textarea>
-                            <div class="d-flex justify-content-between mt-2">
-                                <small class="text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>内容在发送前已在浏览器加密
-                                </small>
-                                <small class="text-muted">
-                                    <span id="charCount">0</span>/2000 字符
-                                </small>
-                            </div>
-                        </div>
-
-                        <!-- 密码设置 -->
-                        <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-lock me-1"></i>访问密码
-                                </label>
-                                <div class="input-group">
-                                    <input 
-                                        type="password" 
-                                        class="form-control" 
-                                        id="passcode" 
-                                        placeholder="设置查看密码"
-                                        minlength="4"
-                                    >
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="password-strength" id="passwordStrengthBar"></div>
-                                    <small class="text-muted" id="passwordStrengthText">密码强度：未知</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-lock me-1"></i>确认密码
-                                </label>
-                                <input 
-                                    type="password" 
-                                    class="form-control" 
-                                    id="confirmPasscode" 
-                                    placeholder="再次输入密码"
-                                >
-                                <div class="mt-2">
-                                    <button class="btn btn-sm btn-outline-info" type="button" id="generatePassword">
-                                        <i class="fas fa-random me-1"></i>生成随机密码
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 过期设置 -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-clock me-1"></i>过期设置
-                            </label>
-                            <div class="expiry-options">
-                                <div class="row g-2">
-                                    <div class="col-4">
-                                        <input type="radio" class="btn-check" name="expiry" id="expiry1" value="1" checked>
-                                        <label class="btn btn-outline-primary w-100 py-3" for="expiry1">
-                                            <i class="fas fa-fire fa-lg mb-2"></i><br>
-                                            阅后即焚<br>
-                                            <small>查看后立即删除</small>
-                                        </label>
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="radio" class="btn-check" name="expiry" id="expiry24" value="24">
-                                        <label class="btn btn-outline-primary w-100 py-3" for="expiry24">
-                                            <i class="fas fa-hourglass-half fa-lg mb-2"></i><br>
-                                            24小时<br>
-                                            <small>24小时后过期</small>
-                                        </label>
-                                    </div>
-                                    <div class="col-4">
-                                        <input type="radio" class="btn-check" name="expiry" id="expiry168" value="168">
-                                        <label class="btn btn-outline-primary w-100 py-3" for="expiry168">
-                                            <i class="fas fa-calendar-day fa-lg mb-2"></i><br>
-                                            7天<br>
-                                            <small>7天后过期</small>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 生成按钮 -->
-                        <div class="text-center">
-                            <button id="generateBtn" class="btn btn-primary btn-lg px-5">
-                                <i class="fas fa-shield-alt me-2"></i>
-                                <span id="btnText">生成安全链接</span>
-                            </button>
-                        </div>
-                    </div>
+    <!-- 分享结果 -->
+    <div id="resultSection" class="d-none card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fa fa-check-circle me-2"></i> 链接创建成功</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label fw-bold">🔗 分享链接</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="shareLink" readonly>
+                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('shareLink')">复制</button>
                 </div>
-
-                <!-- 结果区域 -->
-                <div id="resultSection" class="main-card result-card" style="display: none;">
-                    <div class="card-header bg-success">
-                        <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>链接已生成！</h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="alert alert-success">
-                            <h5><i class="fas fa-lightbulb me-2"></i>安全提示</h5>
-                            <ul class="mb-0">
-                                <li>将链接和密码通过<strong>不同渠道</strong>发送（如：链接发邮件，密码发短信）</li>
-                                <li>秘密只能被查看<strong id="maxViews">1</strong>次</li>
-                                <li>过期时间：<strong id="expiryTime">阅后即焚</strong></li>
-                            </ul>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-link me-1"></i>分享链接
-                            </label>
-                            <div class="input-group">
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="shareLink" 
-                                    readonly
-                                >
-                                <button class="btn btn-outline-primary copy-btn" onclick="copyToClipboard('shareLink')">
-                                    <i class="fas fa-copy me-1"></i>复制
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-key me-1"></i>访问密码
-                            </label>
-                            <div class="input-group">
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="generatedPasscode" 
-                                    readonly
-                                >
-                                <button class="btn btn-outline-primary copy-btn" onclick="copyToClipboard('generatedPasscode')">
-                                    <i class="fas fa-copy me-1"></i>复制
-                                </button>
-                            </div>
-                            <div class="alert alert-danger mt-3">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>重要：</strong>请务必将密码告知接收者！没有密码无法查看秘密。
-                            </div>
-                        </div>
-
-                        <div class="text-center">
-                            <a href="view.html" class="btn btn-success me-2">
-                                <i class="fas fa-eye me-1"></i>测试查看页面
-                            </a>
-                            <button class="btn btn-outline-secondary" onclick="resetForm()">
-                                <i class="fas fa-redo me-1"></i>创建新秘密
-                            </button>
-                        </div>
-                    </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">🔑 访问密码</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="generatedPasscode" readonly>
+                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('generatedPasscode')">复制</button>
                 </div>
+                <div class="form-text mt-2">请妥善保管密码，丢失无法找回</div>
+            </div>
+        </div>
+    </div>
 
-                <!-- 功能特性 -->
-                <div class="row mt-5">
-                    <div class="col-md-4 mb-4">
-                        <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <h4>端到端加密</h4>
-                            <p class="text-muted">秘密在离开浏览器前就已加密，服务器无法读取内容</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="fas fa-fire"></i>
-                            </div>
-                            <h4>阅后即焚</h4>
-                            <p class="text-muted">查看后自动销毁，不留下任何痕迹</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <h4>时间限制</h4>
-                            <p class="text-muted">可设置24小时或7天后自动过期</p>
-                        </div>
-                    </div>
+    <!-- 特色功能区（内容大幅丰富） -->
+    <div class="feature-section text-center mt-5">
+        <h2 class="mb-4"><i class="fa fa-leaf me-2"></i> 花园小筑 · 特色功能</h2>
+        <p class="text-muted mb-5">三种温柔方式，安放你的所有情绪</p>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa fa-hourglass-half"></i></div>
+                    <h3>⏳ 时光胶囊</h3>
+                    <p>给未来的自己写一封信，设定日期自动解锁，让时光见证心意</p>
+                    <button class="feature-btn" data-bs-toggle="modal" data-bs-target="#timeCapsuleModal">立即使用</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa fa-handshake-o"></i></div>
+                    <h3>🤝 双人秘密</h3>
+                    <p>双密码解锁机制，只属于你和TA的专属秘密，安全又浪漫</p>
+                    <button class="feature-btn" data-bs-toggle="modal" data-bs-target="#doubleSecretModal">立即使用</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fa fa-tree"></i></div>
+                    <h3>🌳 情绪树洞</h3>
+                    <p>匿名倾诉所有烦恼，24小时后自动消失，无需背负任何压力</p>
+                    <button class="feature-btn" data-bs-toggle="modal" data-bs-target="#emotionTreeModal">立即使用</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 页脚 -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-shield-alt me-2"></i>SafeShare</h5>
-                    <p>一个简单、安全的临时秘密分享工具</p>
+    <!-- 匿名树洞展示区 -->
+    <div class="treehole-feed">
+        <h2><i class="fa fa-comment-o me-2"></i> 匿名心声墙</h2>
+        <p class="text-muted mb-4">这里藏着大家的温柔心事</p>
+        <div id="publicTreeholeList" class="row g-3">
+            <div class="col-12 text-muted"><i class="fa fa-leaf me-2"></i>快来写下第一条心事吧</div>
+        </div>
+    </div>
+</div>
+
+<!-- 时光胶囊模态框 -->
+<div class="modal fade" id="timeCapsuleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">⏳ 时光胶囊</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">胶囊内容</label>
+                    <textarea id="capsuleSecret" class="form-control" rows="4" placeholder="写给未来的话..."></textarea>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-1">
-                        <i class="fas fa-code me-1"></i>使用 Bootstrap 5 + JavaScript 构建
-                    </p>
-                    <p class="mb-0">
-                        <i class="fas fa-heart text-danger me-1"></i>开源项目，欢迎贡献
-                    </p>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">解锁密码（可选）</label>
+                    <input type="password" id="capsulePass" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">解锁日期</label>
+                    <input type="datetime-local" id="capsuleDate" class="form-control">
                 </div>
             </div>
-            <hr class="bg-light">
-            <div class="text-center">
-                <small>🔒 安全提醒：请勿分享极度敏感的信息，此工具适用于临时分享场景</small>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveCapsuleBtn">封存胶囊</button>
             </div>
         </div>
-    </footer>
+    </div>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- 自定义JS -->
-    <script>
-        // 页面加载完成
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ SafeShare 页面已加载');
-            
-            initForm();
-        });
-        
-        function initForm() {
-            // 字符计数
-            const secretText = document.getElementById('secretText');
-            const charCount = document.getElementById('charCount');
-            
-            secretText.addEventListener('input', function() {
-                charCount.textContent = this.value.length;
-            });
-            
-            // 显示/隐藏密码
-            const togglePassword = document.getElementById('togglePassword');
-            const passcodeInput = document.getElementById('passcode');
-            const confirmPasscodeInput = document.getElementById('confirmPasscode');
-            
-            togglePassword.addEventListener('click', function() {
-                const type = passcodeInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passcodeInput.setAttribute('type', type);
-                confirmPasscodeInput.setAttribute('type', type);
-                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-            });
-            
-            // 密码强度检查
-            passcodeInput.addEventListener('input', function() {
-                updatePasswordStrength(this.value);
-            });
-            
-            // 生成随机密码
-            document.getElementById('generatePassword').addEventListener('click', function() {
-                const password = generateRandomPassword(12);
-                passcodeInput.value = password;
-                confirmPasscodeInput.value = password;
-                updatePasswordStrength(password);
-                showToast('🔑 随机密码已生成', 'info');
-            });
-            
-            // 生成安全链接按钮
-            document.getElementById('generateBtn').addEventListener('click', generateSecretLink);
-        }
-        
-        // 生成安全链接
-        function generateSecretLink() {
-            const secret = document.getElementById('secretText').value.trim();
-            const passcode = document.getElementById('passcode').value;
-            const confirmPasscode = document.getElementById('confirmPasscode').value;
-            const generateBtn = document.getElementById('generateBtn');
-            
-            // 验证
-            if (!secret) {
-                showToast('请输入秘密内容', 'warning');
-                document.getElementById('secretText').focus();
-                return;
-            }
-            
-            if (!passcode) {
-                showToast('请输入访问密码', 'warning');
-                document.getElementById('passcode').focus();
-                return;
-            }
-            
-            if (passcode !== confirmPasscode) {
-                showToast('两次输入的密码不一致', 'error');
-                document.getElementById('confirmPasscode').focus();
-                return;
-            }
-            
-            if (passcode.length < 4) {
-                showToast('密码至少需要4个字符', 'warning');
-                document.getElementById('passcode').focus();
-                return;
-            }
-            
-            // 获取过期设置
-            const expiryRadio = document.querySelector('input[name="expiry"]:checked');
-            const expiryValue = expiryRadio ? expiryRadio.value : '1';
-            let expiryText = '阅后即焚';
-            
-            if (expiryValue === '24') expiryText = '24小时';
-            if (expiryValue === '168') expiryText = '7天';
-            
-            // 显示加载状态
-            const originalText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>生成中...';
-            generateBtn.disabled = true;
-            
-            // 模拟API调用（1.5秒延迟）
-            setTimeout(() => {
-                // 生成随机ID（实际中由后端生成）
-                const randomId = generateRandomId();
-                const shareUrl = `${window.location.origin}/view/${randomId}`;
-                
-                // 更新UI
-                document.getElementById('shareLink').value = shareUrl;
-                document.getElementById('generatedPasscode').value = passcode;
-                document.getElementById('expiryTime').textContent = expiryText;
-                document.getElementById('maxViews').textContent = '1';
-                
-                // 显示结果区域
-                const resultSection = document.getElementById('resultSection');
-                resultSection.style.display = 'block';
-                
-                // 恢复按钮状态
-                generateBtn.innerHTML = originalText;
-                generateBtn.disabled = false;
-                
-                // 滚动到结果区域
-                resultSection.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                
-                // 显示成功提示
-                showToast('✅ 安全链接已生成！', 'success');
-                
-                // 模拟加密过程（控制台输出）
-                console.log('🔐 模拟加密过程：');
-                console.log('   秘密内容：', secret.substring(0, 50) + (secret.length > 50 ? '...' : ''));
-                console.log('   密码哈希：', 'bcrypt_hash_' + passcode.substring(0, 3) + '...');
-                console.log('   过期时间：', expiryText);
-                console.log('   唯一ID：', randomId);
-                
-            }, 1500);
-        }
-        
-        // 生成随机密码
-        function generateRandomPassword(length = 12) {
-            const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-            let password = '';
-            
-            for (let i = 0; i < length; i++) {
-                const randomIndex = Math.floor(Math.random() * charset.length);
-                password += charset[randomIndex];
-            }
-            
-            return password;
-        }
-        
-        // 生成随机ID
-        function generateRandomId() {
-            return Math.random().toString(36).substring(2, 10);
-        }
-        
-        // 密码强度检查
-        function updatePasswordStrength(password) {
-            if (!password) {
-                document.getElementById('passwordStrengthBar').style.width = '0%';
-                document.getElementById('passwordStrengthBar').style.backgroundColor = '#e9ecef';
-                document.getElementById('passwordStrengthText').textContent = '密码强度：未知';
-                return;
-            }
-            
-            let strength = 0;
-            
-            // 长度检查
-            if (password.length >= 4) strength += 1;
-            if (password.length >= 8) strength += 1;
-            if (password.length >= 12) strength += 1;
-            
-            // 字符种类检查
-            if (/[a-z]/.test(password)) strength += 1;
-            if (/[A-Z]/.test(password)) strength += 1;
-            if (/[0-9]/.test(password)) strength += 1;
-            if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
-            
-            // 限制最大值
-            strength = Math.min(strength, 10);
-            
-            const percent = (strength / 10) * 100;
-            const bar = document.getElementById('passwordStrengthBar');
-            const text = document.getElementById('passwordStrengthText');
-            
-            bar.style.width = percent + '%';
-            
-            if (percent < 30) {
-                bar.style.backgroundColor = '#dc3545';
-                text.textContent = '密码强度：弱';
-                text.className = 'text-danger';
-            } else if (percent < 60) {
-                bar.style.backgroundColor = '#ffc107';
-                text.textContent = '密码强度：中等';
-                text.className = 'text-warning';
-            } else if (percent < 80) {
-                bar.style.backgroundColor = '#0dcaf0';
-                text.textContent = '密码强度：良好';
-                text.className = 'text-info';
-            } else {
-                bar.style.backgroundColor = '#198754';
-                text.textContent = '密码强度：强';
-                text.className = 'text-success';
-            }
-        }
-        
-        // 复制到剪贴板
-        function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            if (!element) {
-                showToast('找不到要复制的元素', 'error');
-                return;
-            }
-            
-            element.select();
-            element.setSelectionRange(0, 99999);
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showToast('✅ 已复制到剪贴板', 'success');
-                    
-                    // 短暂改变按钮状态
-                    const button = event.target.tagName === 'BUTTON' ? event.target : event.target.closest('button');
-                    if (button) {
-                        const originalText = button.innerHTML;
-                        button.innerHTML = '<i class="fas fa-check me-1"></i>已复制';
-                        button.classList.remove('btn-outline-primary');
-                        button.classList.add('btn-success');
-                        
-                        setTimeout(() => {
-                            button.innerHTML = originalText;
-                            button.classList.remove('btn-success');
-                            button.classList.add('btn-outline-primary');
-                        }, 2000);
-                    }
-                } else {
-                    showToast('❌ 复制失败', 'error');
-                }
-            } catch (err) {
-                console.error('复制失败:', err);
-                showToast('❌ 复制失败', 'error');
-            }
-        }
-        
-        // 显示Toast提示
-        function showToast(message, type = 'info') {
-            // 移除已有的toast
-            const existingToast = document.querySelector('.custom-toast');
-            if (existingToast) existingToast.remove();
-            
-            // 创建toast
-            const toast = document.createElement('div');
-            toast.className = `custom-toast alert alert-${type} shadow-lg`;
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 9999;
-                min-width: 300px;
-                animation: slideIn 0.3s ease-out;
-            `;
-            
-            // 设置图标
-            let icon = 'ℹ️';
-            if (type === 'success') icon = '✅';
-            if (type === 'error') icon = '❌';
-            if (type === 'warning') icon = '⚠️';
-            if (type === 'info') icon = 'ℹ️';
-            
-            toast.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <span class="me-3" style="font-size: 1.5rem;">${icon}</span>
-                    <span>${message}</span>
-                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+<!-- 双人秘密模态框 -->
+<div class="modal fade" id="doubleSecretModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">🤝 双人秘密</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">秘密内容</label>
+                    <textarea id="doubleSecret" class="form-control" rows="4"></textarea>
                 </div>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // 添加动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // 3秒后移除
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease-out';
-                setTimeout(() => {
-                    toast.remove();
-                    style.remove();
-                }, 300);
-            }, 3000);
-        }
+                <div class="mb-3">
+                    <label class="form-label fw-bold">第一组密码</label>
+                    <input type="password" id="doublePassA" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">第二组密码</label>
+                    <input type="password" id="doublePassB" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveDoubleSecretBtn">创建秘密</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 情绪树洞模态框 -->
+<div class="modal fade" id="emotionTreeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">🌳 情绪树洞</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">倾诉内容</label>
+                    <textarea id="treeWhisper" class="form-control" rows="4" placeholder="尽情倾诉吧..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">匿名昵称</label>
+                    <input type="text" id="treeNickname" class="form-control" placeholder="默认为匿名">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="treePublic" checked>
+                    <label class="form-check-label">公开到心声墙</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveTreeWhisperBtn">投递树洞</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyToClipboard(elementId) {
+    const el = document.getElementById(elementId);
+    navigator.clipboard.writeText(el.value).then(() => alert('✅ 复制成功')).catch(() => alert('❌ 复制失败'));
+}
+
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // 字符计数
+    const textarea = document.getElementById('secretText');
+    const count = document.getElementById('charCount');
+    textarea.addEventListener('input', () => count.textContent = textarea.value.length);
+
+    // 生成分享链接
+    document.getElementById('generateBtn').addEventListener('click', () => {
+        const secret = document.getElementById('secretText').value.trim();
+        const pass = document.getElementById('passcode').value;
+        const confirm = document.getElementById('confirmPasscode').value;
         
-        // 重置表单
-        function resetForm() {
-            document.getElementById('secretText').value = '';
-            document.getElementById('passcode').value = '';
-            document.getElementById('confirmPasscode').value = '';
-            document.getElementById('charCount').textContent = '0';
-            document.getElementById('resultSection').style.display = 'none';
-            document.getElementById('passwordStrengthBar').style.width = '0%';
-            document.getElementById('passwordStrengthText').textContent = '密码强度：未知';
-            document.getElementById('passwordStrengthText').className = 'text-muted';
-            document.getElementById('secretText').focus();
-            
-            showToast('表单已重置，可以创建新秘密', 'info');
+        if (!secret || pass !== confirm || pass.length < 4) {
+            alert('请填写完整信息，且密码长度不小于4位');
+            return;
         }
-    </script>
-</body>
-</html>
+
+        const link = window.location.origin + '/view?key=' + generateId();
+        document.getElementById('shareLink').value = link;
+        document.getElementById('generatedPasscode').value = pass;
+        document.getElementById('resultSection').classList.remove('d-none');
+    });
+
+    // 时光胶囊
+    document.getElementById('saveCapsuleBtn').addEventListener('click', () => {
+        alert('✅ 时光胶囊已成功封存！');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('timeCapsuleModal')).hide();
+    });
+
+    // 双人秘密
+    document.getElementById('saveDoubleSecretBtn').addEventListener('click', () => {
+        alert('✅ 双人秘密创建成功！');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('doubleSecretModal')).hide();
+    });
+
+    // 情绪树洞
+    document.getElementById('saveTreeWhisperBtn').addEventListener('click', () => {
+        const content = document.getElementById('treeWhisper').value.trim();
+        if(!content) { alert('请输入倾诉内容'); return; }
+        document.getElementById('publicTreeholeList').innerHTML = `
+        <div class="col-md-6"><div class="card p-3"><p>${content}</p><p class="small text-muted">匿名用户 · 刚刚</p></div></div>`;
+        alert('✅ 已成功投递至树洞！');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('emotionTreeModal')).hide();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+Flask==2.3.3
+Werkzeug==2.3.7
+cryptography==41.0.7
+bcrypt==4.1.2
+python-dotenv==1.0.0
+uuid==1.30
+python-dateutil==2.8.2
+pytest==7.4.3
+pytest-cov==4.1.0
+black==23.9.1
+flake8==6.1.0
+bandit==1.7.5
+gunicorn==21.2.0

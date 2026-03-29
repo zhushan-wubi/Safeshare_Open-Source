@@ -1,447 +1,155 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>查看秘密 - SafeShare</title>
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <!-- 自定义CSS -->
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #ff9e00;
-            --light: #f8f9fa;
-            --dark: #212529;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding-bottom: 60px;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-        
-        .view-card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            overflow: hidden;
-            background: white;
-            margin-bottom: 30px;
-        }
-        
-        .card-header {
-            background: linear-gradient(to right, #17a2b8, #138496);
-            color: white;
-            font-weight: 600;
-            border: none;
-            padding: 20px;
-        }
-        
-        .secret-content {
-            font-family: 'Courier New', monospace;
-            background-color: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        
-        .btn-success {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
-            border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-        }
-        
-        #countdown {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #f72585;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .footer {
-            background: var(--dark);
-            color: white;
-            padding: 30px 0;
-            margin-top: 60px;
-        }
-    </style>
-</head>
-<body>
-    <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <i class="fas fa-shield-alt me-2"></i>SafeShare
-            </a>
-            <div class="d-flex">
-                <a href="index.html" class="btn btn-outline-light">
-                    <i class="fas fa-plus me-1"></i>分享新秘密
-                </a>
-            </div>
+{% extends "base.html" %}
+
+{% block title %}查看秘密{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    <div class="text-center mb-4">
+        <h2>🔐 查看秘密</h2>
+        <p class="text-muted">请输入访问密码（如需）</p>
+    </div>
+
+    <!-- 普通秘密 / 时光胶囊 共用密码输入区 -->
+    <div id="normalView" class="card" style="display: none;">
+        <div class="card-header">输入密码</div>
+        <div class="card-body">
+            <input type="password" id="viewPasscode" class="form-control mb-3" placeholder="访问密码">
+            <button id="viewSecretBtn" class="btn btn-primary w-100">查看秘密</button>
         </div>
-    </nav>
+    </div>
 
-    <!-- 主内容 -->
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <!-- 标题 -->
-                <div class="text-center mb-5">
-                    <h1 class="display-4 fw-bold">
-                        <i class="fas fa-unlock-alt text-success me-3"></i>
-                        查看秘密
-                    </h1>
-                    <p class="lead text-muted">
-                        请输入访问密码查看秘密内容<br>
-                        <span class="text-danger fw-bold">注意：该秘密只能查看一次！</span>
-                    </p>
-                </div>
+    <!-- 双人秘密专用 -->
+    <div id="doubleView" class="card" style="display: none;">
+        <div class="card-header">双人验证</div>
+        <div class="card-body">
+            <input type="password" id="passA" class="form-control mb-3" placeholder="密码A">
+            <input type="password" id="passB" class="form-control mb-3" placeholder="密码B">
+            <button id="viewDoubleBtn" class="btn btn-primary w-100">查看秘密</button>
+        </div>
+    </div>
 
-                <!-- 输入密码卡片 -->
-                <div class="view-card" id="passwordCard">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="fas fa-key me-2"></i>输入访问密码</h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="alert alert-warning">
-                            <h5><i class="fas fa-exclamation-triangle me-2"></i>重要提醒</h5>
-                            <p class="mb-0">输入正确密码并查看后，秘密将被永久删除，无法再次查看。</p>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-lock me-1"></i>访问密码
-                            </label>
-                            <div class="input-group">
-                                <input 
-                                    type="password" 
-                                    class="form-control form-control-lg" 
-                                    id="viewPasscode" 
-                                    placeholder="请输入访问密码"
-                                    autocomplete="off"
-                                >
-                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordView">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <small class="text-muted">密码由分享者提供，通常通过不同渠道发送</small>
-                        </div>
-
-                        <div class="text-center">
-                            <button id="viewSecretBtn" class="btn btn-success btn-lg px-5">
-                                <i class="fas fa-eye me-2"></i>
-                                查看秘密
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 显示秘密卡片（初始隐藏） -->
-                <div class="view-card" id="secretCard" style="display: none;">
-                    <div class="card-header bg-dark">
-                        <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i>秘密内容</h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="alert alert-danger">
-                            <h5><i class="fas fa-skull-crossbones me-2"></i>警告</h5>
-                            <p class="mb-0">这是你唯一一次查看此秘密的机会！内容将在倒计时结束后自动销毁。</p>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label fw-bold mb-3">
-                                <i class="fas fa-envelope-open-text me-1"></i>秘密内容
-                            </label>
-                            <div class="secret-content" id="secretContent">
-                                <!-- 秘密内容将在这里显示 -->
-                            </div>
-                            <div class="text-center mt-3">
-                                <small class="text-danger">
-                                    <i class="fas fa-fire me-1"></i>此内容将在 <span id="countdownText">10</span> 秒后自动消失
-                                </small>
-                            </div>
-                        </div>
-
-                        <div class="text-center">
-                            <div id="countdown" class="mb-4">10</div>
-                            <div class="d-flex justify-content-center gap-3">
-                                <button id="copySecretBtn" class="btn btn-outline-primary">
-                                    <i class="fas fa-copy me-1"></i>复制内容
-                                </button>
-                                <a href="index.html" class="btn btn-outline-secondary">
-                                    <i class="fas fa-home me-1"></i>返回首页
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 已销毁卡片（初始隐藏） -->
-                <div class="view-card" id="destroyedCard" style="display: none;">
-                    <div class="card-body p-5 text-center">
-                        <div class="mb-4">
-                            <i class="fas fa-fire fa-6x text-danger"></i>
-                        </div>
-                        <h2 class="text-danger mb-3">秘密已销毁</h2>
-                        <p class="text-muted mb-4">此秘密已被永久删除，无法再次查看。</p>
-                        <a href="index.html" class="btn btn-primary btn-lg">
-                            <i class="fas fa-home me-2"></i>分享新秘密
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 安全提示 -->
-                <div class="alert alert-info mt-4">
-                    <h5><i class="fas fa-lightbulb me-2"></i>安全使用建议</h5>
-                    <ul class="mb-0">
-                        <li>请确保在私密环境中查看秘密</li>
-                        <li>建议立即复制内容到安全的地方</li>
-                        <li>不要在公共电脑上查看敏感信息</li>
-                        <li>查看后请关闭此页面</li>
-                    </ul>
-                </div>
+    <!-- 秘密显示区 -->
+    <div id="secretDisplay" class="card mt-4" style="display: none;">
+        <div class="card-header">秘密内容</div>
+        <div class="card-body">
+            <div id="secretContent" class="p-3 bg-light rounded" style="white-space: pre-wrap;"></div>
+            <div class="text-center mt-3">
+                <div id="countdown" class="display-4 text-danger mb-3">10</div>
+                <button id="copySecretBtn" class="btn btn-outline-secondary">复制内容</button>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary ms-2">返回首页</a>
             </div>
         </div>
     </div>
 
-    <!-- 页脚 -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-shield-alt me-2"></i>SafeShare</h5>
-                    <p>一个简单、安全的临时秘密分享工具</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-1">
-                        <i class="fas fa-code me-1"></i>使用 Bootstrap 5 + JavaScript 构建
-                    </p>
-                    <p class="mb-0">
-                        <i class="fas fa-heart text-danger me-1"></i>开源项目，欢迎贡献
-                    </p>
-                </div>
-            </div>
-            <hr class="bg-light">
-            <div class="text-center">
-                <small>🔒 安全提醒：请勿在不受信任的设备上查看敏感信息</small>
-            </div>
-        </div>
-    </footer>
+    <div id="errorMsg" class="alert alert-danger mt-3" style="display: none;"></div>
+</div>
+{% endblock %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- 自定义JS -->
-    <script>
-        // 页面加载完成
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ 查看页面已加载');
-            
-            // 显示/隐藏密码
-            const togglePasswordBtn = document.getElementById('togglePasswordView');
-            const passcodeInput = document.getElementById('viewPasscode');
-            
-            togglePasswordBtn.addEventListener('click', function() {
-                const type = passcodeInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passcodeInput.setAttribute('type', type);
-                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-            });
-            
-            // 查看秘密按钮
-            document.getElementById('viewSecretBtn').addEventListener('click', viewSecret);
-            
-            // 复制秘密按钮
-            document.getElementById('copySecretBtn').addEventListener('click', copySecretContent);
-        });
-        
-        // 查看秘密
-        function viewSecret() {
-            const passcode = document.getElementById('viewPasscode').value;
-            const viewBtn = document.getElementById('viewSecretBtn');
-            
-            if (!passcode) {
-                showToast('请输入访问密码', 'warning');
+{% block extra_js %}
+<script>
+// 获取 URL 参数
+const urlParams = new URLSearchParams(window.location.search);
+const type = urlParams.get('type');
+const id = urlParams.get('id');
+
+let secretData = null;
+
+function showError(msg) {
+    const errDiv = document.getElementById('errorMsg');
+    errDiv.innerText = msg;
+    errDiv.style.display = 'block';
+    setTimeout(() => errDiv.style.display = 'none', 3000);
+}
+
+function showSecret(content) {
+    document.getElementById('secretDisplay').style.display = 'block';
+    document.getElementById('secretContent').innerText = content;
+    let seconds = 10;
+    const countdownEl = document.getElementById('countdown');
+    const timer = setInterval(() => {
+        seconds--;
+        countdownEl.innerText = seconds;
+        if (seconds <= 0) {
+            clearInterval(timer);
+            document.getElementById('secretDisplay').style.display = 'none';
+            showError('秘密已销毁');
+        }
+    }, 1000);
+}
+
+// 加载秘密
+if (type === 'capsule') {
+    const capsules = JSON.parse(localStorage.getItem('timeCapsules') || '[]');
+    secretData = capsules.find(c => c.id === id);
+    if (!secretData) {
+        showError('时光胶囊不存在或已销毁');
+    } else if (secretData.unlockDate > Date.now()) {
+        showError(`此胶囊将于 ${new Date(secretData.unlockDate).toLocaleString()} 解锁`);
+    } else {
+        document.getElementById('normalView').style.display = 'block';
+        document.getElementById('viewSecretBtn').onclick = () => {
+            const inputPass = document.getElementById('viewPasscode').value;
+            if (secretData.passcode && inputPass !== secretData.passcode) {
+                showError('密码错误');
                 return;
             }
-            
-            // 显示加载状态
-            const originalText = viewBtn.innerHTML;
-            viewBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>验证中...';
-            viewBtn.disabled = true;
-            
-            // 模拟API验证（2秒延迟）
-            setTimeout(() => {
-                // 模拟从"服务器"获取的秘密内容
-                const sampleSecrets = [
-                    "我的WiFi密码：HomeNetwork@2024",
-                    "银行卡密码：668899",
-                    "GitHub访问令牌：ghp_abc123def456ghi789jkl012mno345pqr678",
-                    "服务器SSH密钥：ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJlB4cZ3Xg1V8W6q7t8u9i0o1p2q3r4s5t6u7v8w9x0y",
-                    "数据库连接字符串：mysql://admin:SecurePass123@localhost:3306/production_db",
-                    "公司VPN密码：MyCompany@Secure2024!",
-                    "API密钥：sk_live_51H8jFkL9aZ8x7y6t5u4i3o2p1q0w9e8r7t6y5u4i3o"
-                ];
-                
-                // 随机选择一个秘密
-                const randomIndex = Math.floor(Math.random() * sampleSecrets.length);
-                const secretContent = sampleSecrets[randomIndex];
-                
-                // 更新UI
-                document.getElementById('secretContent').textContent = secretContent;
-                document.getElementById('passwordCard').style.display = 'none';
-                document.getElementById('secretCard').style.display = 'block';
-                
-                // 恢复按钮状态
-                viewBtn.innerHTML = originalText;
-                viewBtn.disabled = false;
-                
-                // 开始倒计时
-                startCountdown(10);
-                
-                // 显示成功提示
-                showToast('🔓 秘密已解锁！请立即查看并复制', 'success');
-                
-            }, 2000);
-        }
-        
-        // 开始倒计时
-        function startCountdown(seconds) {
-            let count = seconds;
-            const countdownElement = document.getElementById('countdown');
-            const countdownText = document.getElementById('countdownText');
-            
-            countdownElement.textContent = count;
-            countdownText.textContent = count;
-            
-            const interval = setInterval(() => {
-                count--;
-                countdownElement.textContent = count;
-                countdownText.textContent = count;
-                
-                // 更新颜色
-                if (count <= 3) {
-                    countdownElement.style.color = '#f72585';
-                    countdownElement.style.animation = 'pulse 0.5s infinite';
-                } else if (count <= 7) {
-                    countdownElement.style.color = '#ff9e00';
-                }
-                
-                if (count <= 0) {
-                    clearInterval(interval);
-                    // 显示销毁界面
-                    document.getElementById('secretCard').style.display = 'none';
-                    document.getElementById('destroyedCard').style.display = 'block';
-                    
-                    showToast('🔥 秘密已被销毁', 'warning');
-                }
-            }, 1000);
-        }
-        
-        // 复制秘密内容
-        function copySecretContent() {
-            const secretContent = document.getElementById('secretContent').textContent;
-            
-            navigator.clipboard.writeText(secretContent).then(() => {
-                showToast('✅ 秘密内容已复制到剪贴板', 'success');
-                
-                // 短暂改变按钮状态
-                const button = document.getElementById('copySecretBtn');
-                const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check me-1"></i>已复制';
-                button.classList.remove('btn-outline-primary');
-                button.classList.add('btn-success');
-                
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.classList.remove('btn-success');
-                    button.classList.add('btn-outline-primary');
-                }, 2000);
-            }).catch(err => {
-                console.error('复制失败:', err);
-                showToast('❌ 复制失败', 'error');
-            });
-        }
-        
-        // 显示Toast提示（与index.html中的函数相同）
-        function showToast(message, type = 'info') {
-            // 移除已有的toast
-            const existingToast = document.querySelector('.custom-toast');
-            if (existingToast) existingToast.remove();
-            
-            // 创建toast
-            const toast = document.createElement('div');
-            toast.className = `custom-toast alert alert-${type} shadow-lg`;
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 9999;
-                min-width: 300px;
-                animation: slideIn 0.3s ease-out;
-            `;
-            
-            // 设置图标
-            let icon = 'ℹ️';
-            if (type === 'success') icon = '✅';
-            if (type === 'error') icon = '❌';
-            if (type === 'warning') icon = '⚠️';
-            if (type === 'info') icon = 'ℹ️';
-            
-            toast.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <span class="me-3" style="font-size: 1.5rem;">${icon}</span>
-                    <span>${message}</span>
-                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
-                </div>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // 添加动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // 3秒后移除
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease-out';
-                setTimeout(() => {
-                    toast.remove();
-                    style.remove();
-                }, 300);
-            }, 3000);
-        }
-    </script>
-</body>
-</html>
+            showSecret(secretData.secret);
+            // 删除胶囊
+            const updated = capsules.filter(c => c.id !== id);
+            localStorage.setItem('timeCapsules', JSON.stringify(updated));
+            document.getElementById('normalView').style.display = 'none';
+        };
+    }
+} else if (type === 'double') {
+    const doubles = JSON.parse(localStorage.getItem('doubleSecrets') || '[]');
+    secretData = doubles.find(d => d.id === id);
+    if (!secretData) {
+        showError('双人秘密不存在或已销毁');
+    } else {
+        document.getElementById('doubleView').style.display = 'block';
+        document.getElementById('viewDoubleBtn').onclick = () => {
+            const passA = document.getElementById('passA').value;
+            const passB = document.getElementById('passB').value;
+            if (passA !== secretData.passA || passB !== secretData.passB) {
+                showError('密码错误，请确认两人密码');
+                return;
+            }
+            showSecret(secretData.secret);
+            // 删除
+            const updated = doubles.filter(d => d.id !== id);
+            localStorage.setItem('doubleSecrets', JSON.stringify(updated));
+            document.getElementById('doubleView').style.display = 'none';
+        };
+    }
+} else {
+    // 普通秘密
+    const normals = JSON.parse(localStorage.getItem('normalSecrets') || '[]');
+    secretData = normals.find(n => n.id === id);
+    if (!secretData) {
+        showError('秘密不存在或已过期');
+    } else {
+        document.getElementById('normalView').style.display = 'block';
+        document.getElementById('viewSecretBtn').onclick = () => {
+            const inputPass = document.getElementById('viewPasscode').value;
+            if (inputPass !== secretData.passcode) {
+                showError('密码错误');
+                return;
+            }
+            showSecret(secretData.secret);
+            // 删除
+            const updated = normals.filter(n => n.id !== id);
+            localStorage.setItem('normalSecrets', JSON.stringify(updated));
+            document.getElementById('normalView').style.display = 'none';
+        };
+    }
+}
+
+// 复制功能
+document.getElementById('copySecretBtn')?.addEventListener('click', () => {
+    const content = document.getElementById('secretContent').innerText;
+    navigator.clipboard.writeText(content).then(() => {
+        alert('已复制到剪贴板');
+    }).catch(() => alert('复制失败'));
+});
+</script>
+{% endblock %}

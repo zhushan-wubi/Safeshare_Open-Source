@@ -1,244 +1,158 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>错误 - SafeShare</title>
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <!-- 自定义CSS -->
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --danger: #f72585;
-            --dark: #212529;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-        
-        .error-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-        
-        .error-card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            overflow: hidden;
-            background: white;
-            max-width: 600px;
-            width: 100%;
-        }
-        
-        .card-header {
-            background: linear-gradient(to right, #dc3545, #c82333);
-            color: white;
-            font-weight: 600;
-            border: none;
-            padding: 25px;
-        }
-        
-        .error-icon {
-            font-size: 5rem;
-            color: #dc3545;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-        
-        .btn-primary {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 10px;
-            padding: 12px 30px;
-            font-weight: 600;
-        }
-        
-        .footer {
-            background: var(--dark);
-            color: white;
-            padding: 25px 0;
-            margin-top: auto;
-        }
-        
-        .error-list {
-            text-align: left;
-            margin: 0 auto;
-            max-width: 400px;
-        }
-        
-        .error-list li {
-            margin-bottom: 8px;
-        }
-    </style>
-</head>
-<body>
-    <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <i class="fas fa-shield-alt me-2"></i>SafeShare
-            </a>
-            <div class="d-flex">
-                <a href="index.html" class="btn btn-outline-light me-2">
-                    <i class="fas fa-plus me-1"></i>分享秘密
-                </a>
-                <a href="view.html" class="btn btn-outline-light">
-                    <i class="fas fa-eye me-1"></i>查看秘密
-                </a>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <!-- 错误内容 -->
-    <div class="error-container">
-        <div class="error-card">
-            <div class="card-header text-center">
-                <h3 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>错误 404</h3>
+{% block title %}错误 - SafeShare{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <div class="card-header text-center">
+            <h3 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>错误 {{ error_code|default('404', true) }}</h3>
+        </div>
+        <div class="card-body p-5 text-center">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <div class="card-body p-5 text-center">
-                <div class="error-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
+            
+            <h1 class="display-5 text-danger mb-3">{{ error_message|default('页面未找到', true) }}</h1>
+            <h4 class="text-muted mb-4">抱歉，您访问的页面不存在或已被删除</h4>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        可能的原因：
+                    </h5>
+                    <ul class="error-list">
+                        <li>链接已过期或被删除</li>
+                        <li>输入了错误的访问密码</li>
+                        <li>该秘密已被查看过（阅后即焚）</li>
+                        <li>链接地址输入错误</li>
+                        <li>服务器暂时不可用</li>
+                    </ul>
                 </div>
-                
-                <h1 class="display-5 text-danger mb-3">页面未找到</h1>
-                <h4 class="text-muted mb-4">抱歉，您访问的页面不存在或已被删除</h4>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">
-                            <i class="fas fa-question-circle text-primary me-2"></i>
-                            可能的原因：
-                        </h5>
-                        <ul class="error-list">
-                            <li>链接已过期或被删除</li>
-                            <li>输入了错误的访问密码</li>
-                            <li>该秘密已被查看过（阅后即焚）</li>
-                            <li>链接地址输入错误</li>
-                            <li>服务器暂时不可用</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="d-grid gap-3 col-md-8 mx-auto">
-                    <a href="index.html" class="btn btn-primary btn-lg">
-                        <i class="fas fa-home me-2"></i>返回首页
-                    </a>
-                    <div class="d-flex gap-2">
-                        <button onclick="history.back()" class="btn btn-outline-secondary flex-fill">
-                            <i class="fas fa-arrow-left me-1"></i>返回上一页
-                        </button>
-                        <a href="view.html" class="btn btn-outline-info flex-fill">
-                            <i class="fas fa-eye me-1"></i>尝试查看秘密
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="mt-4">
-                    <p class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        如果问题持续存在，请检查网络连接或联系管理员
-                    </p>
-                </div>
-                
-                <!-- 技术支持信息 -->
-                <div class="alert alert-light mt-4">
-                    <h6><i class="fas fa-life-ring me-2"></i>技术支持</h6>
-                    <p class="mb-1 small">
-                        这是一个开源项目，如果您是开发者，可以查看：
-                    </p>
-                    <a href="https://github.com/yourusername/SafeShare" target="_blank" class="btn btn-sm btn-dark">
-                        <i class="fab fa-github me-1"></i>GitHub 仓库
+            </div>
+            
+            <div class="d-grid gap-3 col-md-8 mx-auto">
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>返回首页
+                </a>
+                <div class="d-flex gap-2">
+                    <button onclick="history.back()" class="btn btn-outline-secondary flex-fill">
+                        <i class="fas fa-arrow-left me-1"></i>返回上一页
+                    </button>
+                    <a href="{{ url_for('view_page') }}" class="btn btn-outline-info flex-fill">
+                        <i class="fas fa-eye me-1"></i>尝试查看秘密
                     </a>
                 </div>
+            </div>
+            
+            <div class="mt-4">
+                <p class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    如果问题持续存在，请检查网络连接或联系管理员
+                </p>
+            </div>
+            
+            <!-- 技术支持信息 -->
+            <div class="alert alert-light mt-4">
+                <h6><i class="fas fa-life-ring me-2"></i>技术支持</h6>
+                <p class="mb-1 small">
+                    这是一个开源项目，如果您是开发者，可以查看：
+                </p>
+                <a href="https://github.com/yourusername/SafeShare" target="_blank" class="btn btn-sm btn-dark">
+                    <i class="fab fa-github me-1"></i>GitHub 仓库
+                </a>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <!-- 页脚 -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-shield-alt me-2"></i>SafeShare</h5>
-                    <p>一个简单、安全的临时秘密分享工具</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-1">
-                        <i class="fas fa-code me-1"></i>使用 Bootstrap 5 + JavaScript 构建
-                    </p>
-                    <p class="mb-0">
-                        <i class="fas fa-heart text-danger me-1"></i>开源项目，欢迎贡献
-                    </p>
-                </div>
-            </div>
-            <hr class="bg-light">
-            <div class="text-center">
-                <small>🔒 安全提醒：SafeShare 仅用于临时分享非极度敏感信息</small>
-            </div>
-        </div>
-    </footer>
+{% block extra_css %}
+<style>
+.error-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+.error-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    overflow: hidden;
+    background: white;
+    max-width: 600px;
+    width: 100%;
+}
+
+.card-header {
+    background: linear-gradient(to right, #dc3545, #c82333);
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 25px;
+}
+
+.error-icon {
+    font-size: 5rem;
+    color: #dc3545;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.error-list {
+    text-align: left;
+    margin: 0 auto;
+    max-width: 400px;
+}
+
+.error-list li {
+    margin-bottom: 8px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 页面加载完成
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ 错误页面已加载');
     
-    <!-- 自定义JS -->
-    <script>
-        // 页面加载完成
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ 错误页面已加载');
-            
-            // 获取URL中的错误信息（如果有）
-            const urlParams = new URLSearchParams(window.location.search);
-            const errorCode = urlParams.get('code') || '404';
-            const errorMessage = urlParams.get('message') || '页面未找到';
-            
-            // 更新错误信息
-            document.querySelector('.card-header h3').textContent = `错误 ${errorCode}`;
-            document.querySelector('.display-5').textContent = errorMessage;
-        });
-        
-        // 简单的帮助函数
-        function showQuickMessage(message, type = 'info') {
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            alert.style.cssText = 'bottom: 20px; right: 20px; z-index: 9999; max-width: 300px;';
-            alert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(alert);
-            
-            // 3秒后自动消失
-            setTimeout(() => {
-                alert.classList.remove('show');
-                setTimeout(() => alert.remove(), 150);
-            }, 3000);
-        }
-    </script>
-</body>
-</html>
+    // 获取URL中的错误信息（如果有）
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorCode = urlParams.get('code') || '{{ error_code|default("404", true) }}';
+    const errorMessage = urlParams.get('message') || '{{ error_message|default("页面未找到", true) }}';
+    
+    // 更新错误信息
+    document.querySelector('.card-header h3').textContent = `错误 ${errorCode}`;
+    document.querySelector('.display-5').textContent = errorMessage;
+});
+
+// 简单的提示函数
+function showQuickMessage(message, type = 'info') {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alert.style.cssText = 'bottom: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // 3秒后自动消失
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => alert.remove(), 150);
+    }, 3000);
+}
+</script>
+{% endblock %}
