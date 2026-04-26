@@ -1,139 +1,246 @@
-// SafeShare 秘密花园 - 完善版
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🌿 莫奈秘密花园 加载完成');
-    initPasswordStrength();
-    initCopyFunction();
-    initCharacterCount();
-    initTogglePassword();
-});
+// 🌈 当前情绪
+let currentEmotion = "calm";
 
-// ========== 1. 复制到剪贴板（现代API，兼容所有浏览器） ==========
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
+// 🧠 AI温柔回复系统（备用）
+function generateAIReply(emotion, text) {
+    const replies = {
+        happy: ["听到你的开心，我也忍不住笑了 🌼"],
+        sad: ["没关系的，你已经很努力了 🤍"],
+        angry: ["你的情绪是有理由的 🔥"],
+        anxious: ["慢慢来就好 🌿"],
+        calm: ["这一刻，就很好 ✨"]
+    };
 
-    navigator.clipboard.writeText(element.value)
-        .then(() => showToast('✅ 已复制到剪贴板', 'success'))
-        .catch(() => showToast('❌ 复制失败，请手动复制', 'error'));
+    const list = replies[emotion] || replies["calm"];
+    return list[Math.floor(Math.random() * list.length)];
 }
 
-// ========== 2. 自定义Toast提示（贴合油画风格） ==========
-function showToast(message, type = 'info') {
-    // 清除已有Toast
-    const existing = document.querySelector('.custom-toast');
-    if (existing) existing.remove();
+// 📋 复制
+function copyText(text) {
+    navigator.clipboard.writeText(text)
+        .then(() => alert("✅ 已复制！"))
+        .catch(() => alert("❌ 复制失败"));
+}
 
-    const toast = document.createElement('div');
-    toast.className = `custom-toast toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3 p-3`;
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+document.addEventListener("DOMContentLoaded", () => {
+
+    // 🌈 情绪选择
+    document.querySelectorAll(".emotion-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            currentEmotion = this.dataset.emotion;
+
+            document.querySelectorAll(".emotion-btn")
+                .forEach(b => b.classList.remove("active"));
+
+            this.classList.add("active");
+
+            document.body.setAttribute("data-theme", currentEmotion);
+        });
+    });
+
+    // ✍️ 字数统计
+    const textarea = document.getElementById("secretText");
+    const count = document.getElementById("charCount");
+
+    if (textarea && count) {
+        textarea.addEventListener("input", () => {
+            count.textContent = textarea.value.length;
+        });
+    }
+
+    // 👁️ 密码显示
+    const toggleBtn = document.getElementById("togglePassword");
+    if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+            const input = document.getElementById("passcode");
+            input.type = input.type === "password" ? "text" : "password";
+        });
+    }
+
+    // 🚀 生成分享链接（✅ 已修复）
+    const generateBtn = document.getElementById("generateBtn");
+
+    if (generateBtn) {
+        generateBtn.addEventListener("click", () => {
+
+            const secret = document.getElementById("secretText").value.trim();
+            const pass = document.getElementById("passcode").value;
+            const confirm = document.getElementById("confirmPasscode").value;
+
+            if (!secret) {
+                alert("请输入内容");
+                return;
+            }
+
+            if (pass.length < 4 || pass !== confirm) {
+                alert("密码不符合要求");
+                return;
+            }
+
+            // ✅ 调用后端生成真实ID
+            fetch('/api/secret', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    secret: secret,
+                    passcode: pass,
+                    type: "normal"
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if (!data.success) {
+                    alert("生成失败");
+                    return;
+                }
+
+                const id = data.id;
+
+                // ✅ 正确链接格式（关键修复点）
+                const link = window.location.origin + "/view/" + id;
+
+                showResult(secret, link);
+
+            })
+            .catch(err => {
+                console.error(err);
+                alert("生成失败");
+            });
+        });
+    }
+
+    // 🌳 树洞功能
+    const treeBtn = document.getElementById("saveTreeWhisperBtn");
+
+    if (treeBtn) {
+        treeBtn.addEventListener("click", () => {
+
+            const content = document.getElementById("treeWhisper").value.trim();
+
+            if (!content) {
+                alert("请输入内容");
+                return;
+            }
+
+            fetch('/api/secret', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    secret: content,
+                    type: "tree"
+                })
+            })
+            .then(res => res.json())
+            .then(() => {
+                return fetch('/api/ai-reply', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        content: content,
+                        emotion: currentEmotion
+                    })
+                });
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                addTreeHole(content, data.reply);
+
+                alert("🌳 已被温柔接住了");
+
+                document.getElementById("treeWhisper").value = "";
+
+                try {
+                    const modal = bootstrap.Modal.getInstance(
+                        document.getElementById("emotionTreeModal")
+                    );
+                    if (modal) modal.hide();
+                } catch (e) {}
+
+            })
+            .catch(err => {
+                console.error(err);
+
+                const fakeReply = generateAIReply(currentEmotion, content);
+                addTreeHole(content, fakeReply);
+
+                alert("⚠️ AI连接失败，已使用本地回复");
+            });
+        });
+    }
+
+    // 🌱 加载历史树洞（优化：不覆盖情绪）
+    fetch('/api/treeholes')
+        .then(res => res.json())
+        .then(list => {
+            list.reverse().forEach(item => {
+                addTreeHole(item.content, "🌱 一段被留下的心声", "calm");
+            });
+        });
+
+});
+
+
+// 🌳 渲染树洞（✅ 修复情绪混乱bug）
+function addTreeHole(content, aiReply, emotion = currentEmotion) {
+
+    const list = document.getElementById("publicTreeholeList");
+    if (!list) return;
+
+    const div = document.createElement("div");
+    div.className = "col-md-6";
+
+    div.innerHTML = `
+        <div class="card p-3 mb-3">
+            <p>${content}</p>
+            <p class="small text-muted">匿名用户 · 刚刚 · ${emotion}</p>
+
+            <div class="mt-3 p-2 rounded ai-typing" style="background: rgba(255,255,255,0.6)">
+                🤖 ${aiReply}
+            </div>
         </div>
     `;
-    document.body.appendChild(toast);
-    const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-    bsToast.show();
+
+    list.prepend(div);
 }
 
-// ========== 3. 密码强度检测 ==========
-function initPasswordStrength() {
-    const passInput = document.getElementById('passcode');
-    if (!passInput) return;
 
-    passInput.addEventListener('input', function() {
-        const strength = checkPasswordStrength(this.value);
-        updateStrengthUI(strength);
-    });
+// 🌸 分享结果
+function showResult(secret, link) {
+
+    const aiReply = generateAIReply(currentEmotion, secret);
+
+    const box = document.createElement("div");
+    box.className = "card p-4 mt-4";
+
+    box.innerHTML = `
+        <h5>✅ 分享已生成</h5>
+
+        <div class="mb-2">
+            <input class="form-control" value="${link}" readonly>
+        </div>
+
+        <div class="d-flex gap-2 mb-2">
+            <button class="btn btn-primary copy-btn">复制链接</button>
+            <button class="btn btn-secondary close-btn">关闭</button>
+        </div>
+
+        <p class="text-muted small">
+            🔒 打开后需要输入密码查看，且仅可查看一次
+        </p>
+
+        <div class="p-3 rounded ai-typing" style="background: rgba(255,255,255,0.6)">
+            🤖 ${aiReply}
+        </div>
+    `;
+
+    document.querySelector(".container").appendChild(box);
+
+    box.querySelector(".copy-btn").onclick = () => copyText(link);
+    box.querySelector(".close-btn").onclick = () => box.remove();
+
+    document.getElementById("secretText").value = "";
+    document.getElementById("passcode").value = "";
+    document.getElementById("confirmPasscode").value = "";
 }
-
-function checkPasswordStrength(password) {
-    if (!password) return 0;
-    let score = 0;
-    if (password.length >= 6) score++;
-    if (password.length >= 10) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^a-zA-Z0-9]/.test(password)) score++;
-    return Math.min(score, 6);
-}
-
-function updateStrengthUI(strength) {
-    const bar = document.getElementById('passwordStrength');
-    const text = document.getElementById('passwordStrengthText');
-    if (!bar || !text) return;
-
-    const config = [
-        { cls: 'bg-danger', text: '非常弱' },
-        { cls: 'bg-danger', text: '弱' },
-        { cls: 'bg-warning', text: '一般' },
-        { cls: 'bg-warning', text: '中等' },
-        { cls: 'bg-info', text: '良好' },
-        { cls: 'bg-success', text: '强' },
-        { cls: 'bg-success', text: '非常强' }
-    ];
-    const width = (strength / 6) * 100;
-    bar.style.width = `${width}%`;
-    bar.className = `progress-bar ${config[strength].cls}`;
-    text.textContent = `密码强度: ${config[strength].text}`;
-    text.className = `form-text ${config[strength].cls.replace('bg-', 'text-')}`;
-}
-
-// ========== 4. 输入框字符计数 ==========
-function initCharacterCount() {
-    const textarea = document.getElementById('secretText');
-    const count = document.getElementById('charCount');
-    if (!textarea || !count) return;
-    textarea.addEventListener('input', () => {
-        count.textContent = textarea.value.length;
-        textarea.value.length > 1800 && showToast('⚠️ 接近最大字符限制', 'warning');
-    });
-}
-
-// ========== 5. 密码显示/隐藏 ==========
-function initTogglePassword() {
-    const btn = document.getElementById('togglePassword');
-    const input = document.getElementById('passcode');
-    if (!btn || !input) return;
-    btn.addEventListener('click', function() {
-        const type = input.type === 'password' ? 'text' : 'password';
-        input.type = type;
-        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-    });
-}
-
-// ========== 6. 倒计时销毁逻辑 ==========
-function startCountdown(seconds, element) {
-    let time = seconds;
-    const timer = setInterval(() => {
-        element.textContent = time;
-        time--;
-        if (time < 0) {
-            clearInterval(timer);
-            element.closest('.card').innerHTML = `
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-fire fa-4x text-danger mb-3"></i>
-                    <h3>秘密已销毁</h3>
-                    <p class="text-muted">已永久删除，无法恢复</p>
-                    <a href="/" class="btn btn-primary mt-2">返回首页</a>
-                </div>
-            `;
-            showToast('🔥 秘密已自动销毁', 'warning');
-        }
-    }, 1000);
-}
-
-// ========== 7. 通用ID生成 ==========
-function generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
-}
-
-// 离开页面警告
-window.addEventListener('beforeunload', (e) => {
-    const secretBox = document.getElementById('secretDisplay');
-    if (secretBox && secretBox.style.display === 'block') {
-        e.returnValue = '秘密正在查看，离开将销毁！';
-    }
-});

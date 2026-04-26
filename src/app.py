@@ -1,130 +1,168 @@
-# app.py - 完整的Flask应用
-from flask import Flask, render_template, request, jsonify, redirect, url_for
-import os
+from flask import Flask, request, jsonify, render_template
 import uuid
-from datetime import datetime, timedelta
+import time
+import json
+import os
 
 app = Flask(__name__)
 
-# 临时存储（开发用）- 实际项目会用数据库
-secrets_store = {}
+# 🔐 数据存储文件
+DATA_FILE = "data.json"
 
+# 内存数据
+secrets = {}
+
+# ==============================
+# 💾 数据持久化
+# ==============================
+def save_data():
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(secrets, f, ensure_ascii=False)
+
+def load_data():
+    global secrets
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            try:
+                secrets = json.load(f)
+            except:
+                secrets = {}
+    else:
+        secrets = {}
+
+# 启动时加载
+load_data()
+
+# ==============================
+# 🌿 首页
+# ==============================
 @app.route('/')
 def index():
-    """主页"""
     return render_template('index.html')
 
-@app.route('/view')
-def view_page():
-    """查看页面（无ID）"""
+
+# ==============================
+# 🔐 查看页面
+# ==============================
+@app.route('/view/<secret_id>')
+def view(secret_id):
     return render_template('view.html')
 
-@app.route('/view/<secret_id>')
-def view_secret(secret_id):
-    """查看特定秘密的页面"""
-    return render_template('view.html', secret_id=secret_id)
 
+# ==============================
+# ✨ 创建秘密
+# ==============================
 @app.route('/api/secret', methods=['POST'])
 def create_secret():
-    """创建新秘密的API端点"""
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'success': False, 'error': 'No data provided'}), 400
-        
-        secret_id = str(uuid.uuid4())[:8]  # 生成8位ID
-        
-        # 获取过期时间
-        expiry = data.get('expiry', '1')
-        expiry_hours = int(expiry)
-        
-        # 存储秘密（实际项目中应该加密存储）
-        secrets_store[secret_id] = {
-            'id': secret_id,
-            'encrypted_secret': data.get('secret', ''),
-            'passcode_hash': data.get('passcode', ''),
-            'created_at': datetime.now(),
-            'expires_at': datetime.now() + timedelta(hours=expiry_hours),
-            'max_views': 1,
-            'view_count': 0,
-            'viewed': False
-        }
-        
-        return jsonify({
-            'success': True,
-            'id': secret_id,
-            'message': 'Secret created successfully'
-        })
-        
-    except Exception as e:
-        print(f"Error creating secret: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+    data = request.json
 
-@app.route('/api/secret/<secret_id>', methods=['POST'])
-def get_secret(secret_id):
-    """获取秘密的API端点"""
-    try:
-        data = request.get_json()
-        if not data or 'passcode' not in data:
-            return jsonify({'success': False, 'error': 'Missing passcode'}), 400
-        
-        # 检查秘密是否存在
-        if secret_id not in secrets_store:
-            return jsonify({'success': False, 'error': 'Secret not found'}), 404
-        
-        secret_data = secrets_store[secret_id]
-        
-        # 检查是否已查看
-        if secret_data['viewed']:
-            return jsonify({'success': False, 'error': 'Secret already viewed'}), 410
-        
-        # 检查密码（简化验证，实际应该使用hash验证）
-        if data['passcode'] != secret_data['passcode_hash']:
-            return jsonify({'success': False, 'error': 'Incorrect passcode'}), 401
-        
-        # 标记为已查看
-        secrets_store[secret_id]['viewed'] = True
-        secrets_store[secret_id]['view_count'] += 1
-        
-        # 返回秘密
-        return jsonify({
-            'success': True,
-            'secret': secret_data['encrypted_secret'],
-            'viewed': True,
-            'remaining_views': 0
-        })
-        
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    secret_text = data.get('secret')
+    passcode = data.get('passcode')
+    secret_type = data.get('type', 'tree')
+    unlock_time = data.get('unlock_time')
 
-@app.route('/health')
-def health_check():
-    """健康检查"""
+    if not secret_text:
+        return jsonify({'success': False, 'error': '内容不能为空'})
+
+    secret_id = str(uuid.uuid4())[:8]
+
+    secrets[secret_id] = {
+        'secret': secret_text,
+        'passcode': passcode,
+        'type': secret_type,
+        'unlock_time': unlock_time,
+        'created': time.time()
+    }
+
+    save_data()  # 💾 保存
+
     return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'version': '0.1.0'
+        'success': True,
+        'id': secret_id
     })
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('error.html', 
-                          error_code=404,
-                          error_message='页面未找到'), 404
 
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('error.html',
-                          error_code=500,
-                          error_message='服务器内部错误'), 500
+# ==============================
+# 🔓 获取秘密
+# ==============================
+@app.route('/api/secret/<secret_id>')
+def get_secret(secret_id):
+    passcode = request.args.get('passcode')
+    secret = secrets.get(secret_id)
 
+    if not secret:
+        return jsonify({'success': False, 'error': '秘密不存在或已销毁'})
+
+    # ⏳ 时间胶囊
+    if secret.get('type') == 'time':
+        unlock_time = secret.get('unlock_time')
+        if unlock_time:
+            now = int(time.time() * 1000)
+            if now < int(unlock_time):
+                return jsonify({
+                    'success': False,
+                    'error': '⏳ 还没到解锁时间'
+                })
+
+    # 🔐 密码
+    if secret.get('passcode') != passcode:
+        return jsonify({'success': False, 'error': '密码错误'})
+
+    content = secret['secret']
+
+    # ❗ 删除（一次性）
+    del secrets[secret_id]
+    save_data()
+
+    return jsonify({
+        'success': True,
+        'secret': content
+    })
+
+
+# ==============================
+# 🌳 获取树洞列表
+# ==============================
+@app.route('/api/treeholes')
+def get_treeholes():
+    result = []
+
+    for key, value in secrets.items():
+        if value.get("type") == "tree":
+            result.append({
+                "id": key,
+                "content": value.get("secret"),
+                "time": value.get("created")
+            })
+
+    return jsonify(result)
+
+
+# ==============================
+# 🤖 AI 回复
+# ==============================
+@app.route('/api/ai-reply', methods=['POST'])
+def ai_reply():
+    data = request.json
+    content = data.get("content", "")
+    emotion = data.get("emotion", "calm")
+
+    if emotion == "sad":
+        reply = "雨落在你心上，不需要急着撑伞。我会在这里，陪你慢慢等天晴。"
+    elif emotion == "happy":
+        reply = "听你开心，我也觉得今天的晚风会软一些。✨"
+    elif emotion == "angry":
+        reply = "像石头砸进水面。愤怒的波纹会慢慢散去，但那一刻的真实，我看见了。"
+    elif emotion == "anxious":
+        reply = "不用一下子走很远，我们一步一步来就好。"
+    else:
+        reply = "我在听，你可以慢慢说。"
+
+    return jsonify({"reply": reply})
+
+
+# ==============================
+# 🚀 启动
+# ==============================
 if __name__ == '__main__':
-    print("🚀 启动 SafeShare 开发服务器...")
-    print("🌐 访问地址: http://localhost:5000")
-    print("📁 静态文件: http://localhost:5000/static/")
-    print("🛑 按 Ctrl+C 停止服务器")
-    
-    app.run(
-        port=5000,
-        debug=True
-    )
+    app.run(debug=True)
