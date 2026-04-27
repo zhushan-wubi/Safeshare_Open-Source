@@ -58,17 +58,19 @@
                 </div>
             </div>
 
-            <div class="mb-4">
-                <label class="form-label fw-bold">⏳ 选择过期模式</label>
-                <div class="btn-group w-100">
-                    <input type="radio" class="btn-check" name="expiry" id="expiry1" value="1" checked>
-                    <label class="btn btn-outline-primary" for="expiry1">阅后即焚</label>
-                    <input type="radio" class="btn-check" name="expiry" id="expiry24" value="24">
-                    <label class="btn btn-outline-primary" for="expiry24">24小时有效</label>
-                    <input type="radio" class="btn-check" name="expiry" id="expiry168" value="168">
-                    <label class="btn btn-outline-primary" for="expiry168">7天有效</label>
-                </div>
-            </div>
+        <div class="mb-4">
+    <label class="form-label fw-bold">⏳ 选择过期模式</label>
+    <div class="btn-group w-100">
+        <input type="radio" class="btn-check" name="expiry" id="expiry1" value="1" checked data-mode="burn_after_read">
+        <label class="btn btn-outline-primary" for="expiry1">阅后即焚</label>
+        
+        <input type="radio" class="btn-check" name="expiry" id="expiry24" value="24" data-mode="24h">
+        <label class="btn btn-outline-primary" for="expiry24">24小时有效</label>
+        
+        <input type="radio" class="btn-check" name="expiry" id="expiry168" value="168" data-mode="7d">
+        <label class="btn btn-outline-primary" for="expiry168">7天有效</label>
+    </div>
+</div>
 
             <div class="d-grid">
                 <button id="generateBtn" class="btn btn-primary btn-lg"><i class="fa fa-shield-alt me-2"></i> 生成安全分享链接</button>
@@ -247,22 +249,36 @@ let currentEmotion = "calm";
 // 本地备用AI回复
 function generateAIReply(emotion) {
     const replies = {
-        happy: "听到你的开心，我也忍不住笑了 🌼",
-        sad: "没关系的，你已经很努力了 🤍",
-        angry: "你的情绪是有理由的 🔥",
-        anxious: "慢慢来就好 🌿",
-        calm: "这一刻，就很好 ✨"
+        happy: "听你开心，我也觉得今天的晚风会软一些 🌼",
+        sad: "像下雨天坐在窗边。雨会停，但不用现在停 🤍",
+        angry: "像石头砸进水面。愤怒的波纹会慢慢散去，但那一刻的真实，我看见了 🔥",
+        anxious: "慢慢走，我在这。快慢都没关系 🌿",
+        calm: "心里的声音终于小下去了。值得为此停一分钟 ✨"
     };
     return replies[emotion] || replies.calm;
 }
 
-// 复制函数（修复匹配）
+// 复制函数
 function copyToClipboard(id) {
     const input = document.getElementById(id);
     input.select();
     navigator.clipboard.writeText(input.value)
         .then(() => alert("✅ 复制成功！"))
         .catch(() => alert("❌ 复制失败"));
+}
+
+// 统一显示结果（所有秘密共用）
+function showSecretResult(link, pass, title) {
+    document.getElementById("resultSection").classList.remove("d-none");
+    document.getElementById("shareLink").value = link;
+    document.getElementById("generatedPasscode").value = pass;
+    document.getElementById("aiReplyText").textContent = title + " 创建成功！";
+    
+    // 清空所有表单
+    document.getElementById("secretText").value = "";
+    document.getElementById("passcode").value = "";
+    document.getElementById("confirmPasscode").value = "";
+    document.getElementById("charCount").textContent = "0";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -289,72 +305,208 @@ document.addEventListener("DOMContentLoaded", () => {
         input.type = input.type === "password" ? "text" : "password";
     });
 
-    // 生成分享链接
-    document.getElementById("generateBtn").addEventListener("click", async () => {
-        const secret = textarea.value.trim();
-        const pass = document.getElementById("passcode").value;
-        const confirm = document.getElementById("confirmPasscode").value;
+    // ==============================================
+    // 1. 普通秘密分享（正常可用）
+    // ==============================================
+    // 🚀 普通秘密 - 修复链接格式
+document.getElementById("generateBtn").addEventListener("click", async function() {
+    const secret = document.getElementById("secretText").value.trim();
+    const pass = document.getElementById("passcode").value;
+    const confirm = document.getElementById("confirmPasscode").value;
 
-        if (!secret) return alert("请输入内容");
-        if (pass.length < 4 || pass !== confirm) return alert("密码不符合要求");
+    if (!secret) {
+        alert("请输入内容");
+        return;
+    }
+    if (pass.length < 4 || pass !== confirm) {
+        alert("密码不符合要求（至少4位，两次输入一致）");
+        return;
+    }
 
-        try {
-            // 存储到后端
-            const res = await fetch("/api/secret", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ secret, passcode: pass, type: "normal" })
-            });
-            const data = await res.json();
-            const link = `${window.location.origin}/view?key=${data.id}`;
+    try {
+        const res = await fetch("/api/secret", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                secret: secret,
+                passcode: pass,
+                type: "normal"
+            })
+        });
+        const data = await res.json();
 
-            // AI回复
-            const aiRes = await fetch("/api/ai-reply", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ emotion: currentEmotion })
-            });
-            const aiData = await aiRes.json();
-
-            // 展示结果
-            document.getElementById("resultSection").classList.remove("d-none");
-            document.getElementById("shareLink").value = link;
-            document.getElementById("generatedPasscode").value = pass;
-            document.getElementById("aiReplyText").textContent = aiData.reply;
-
-            // 清空表单
-            textarea.value = "";
-            document.getElementById("passcode").value = "";
-            document.getElementById("confirmPasscode").value = "";
-            count.textContent = "0";
-        } catch (err) {
-            console.error(err);
-            alert("❌ 生成失败，请重试");
+        if (!data.success) {
+            alert("生成失败");
+            return;
         }
-    });
 
-    // 树洞提交
+        // 生成 /view/xxx 格式链接
+        const shareLink = `${window.location.origin}/view/${data.id}`;
+        
+        // 替换页面静态输入框的值
+        document.getElementById("shareLink").value = shareLink;
+        document.getElementById("generatedPasscode").value = pass;
+        document.getElementById("resultSection").classList.remove("d-none");
+        document.getElementById("aiReplyText").textContent = "普通秘密 创建成功！";
+
+        // 清空表单
+        document.getElementById("secretText").value = "";
+        document.getElementById("passcode").value = "";
+        document.getElementById("confirmPasscode").value = "";
+
+    } catch (err) {
+        console.error(err);
+        alert("生成失败");
+    }
+});
+
+    // ==============================================
+    // 2. ✅ 修复：时光胶囊 → 生成链接 + 存储
+    // ==============================================
+    // ⏳ 时光胶囊 - 修复链接格式
+document.getElementById("saveCapsuleBtn").addEventListener("click", async function() {
+    const content = document.getElementById("capsuleSecret").value.trim();
+    const pass = document.getElementById("capsulePass").value.trim();
+    const unlockDate = document.getElementById("capsuleDate").value;
+
+    // 校验
+    if (!content) {
+        alert("请输入胶囊内容");
+        return;
+    }
+    if (!unlockDate) {
+        alert("请选择解锁日期");
+        return;
+    }
+
+    try {
+        // 转换解锁时间为时间戳（后端需要）
+        const unlockTime = new Date(unlockDate).getTime();
+        
+        // 调用后端创建时光胶囊
+        const res = await fetch("/api/secret", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                secret: content,
+                passcode: pass,
+                type: "time",
+                unlock_time: unlockTime
+            })
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+            alert("时光胶囊创建失败");
+            return;
+        }
+
+        // 生成 /view/xxx 格式链接（核心修复）
+        const shareLink = `${window.location.origin}/view/${data.id}`;
+        
+        // 替换页面静态输入框的值
+        document.getElementById("shareLink").value = shareLink;
+        document.getElementById("generatedPasscode").value = pass || "无密码";
+        document.getElementById("resultSection").classList.remove("d-none");
+        document.getElementById("aiReplyText").textContent = "时光胶囊 创建成功！";
+
+        // 清空表单 + 关闭弹窗
+        document.getElementById("capsuleSecret").value = "";
+        document.getElementById("capsulePass").value = "";
+        document.getElementById("capsuleDate").value = "";
+        bootstrap.Modal.getInstance(document.getElementById("timeCapsuleModal")).hide();
+
+    } catch (err) {
+        console.error(err);
+        alert("时光胶囊创建失败");
+    }
+});
+
+    // ==============================================
+    // 3. ✅ 修复：双人秘密 → 生成链接 + 双密码存储
+    // ==============================================
+    // 👥 双人秘密 - 彻底修复链接+密码格式
+document.getElementById("saveDoubleSecretBtn").addEventListener("click", async function() {
+    const content = document.getElementById("doubleSecret").value.trim();
+    const passA = document.getElementById("doublePassA").value.trim();
+    const passB = document.getElementById("doublePassB").value.trim();
+
+    if (!content) {
+        alert("请输入秘密内容");
+        return;
+    }
+    if (!passA || !passB) {
+        alert("请设置两组密码");
+        return;
+    }
+
+    // 1. 密码处理：存储用|分隔，显示纯拼接（无+无空格）
+    const storePass = passA + "|" + passB; // 后端校验用
+    const showPass = passA + passB;       // 显示给用户的密码
+
+    // 2. 调用后端生成秘密
+    try {
+        const res = await fetch("/api/secret", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                secret: content,
+                passcode: storePass,
+                type: "double"
+            })
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+            alert("创建失败");
+            return;
+        }
+
+        // 3. 生成正确的链接格式 /view/xxx（核心修复）
+        const secretId = data.id;
+        const shareLink = `${window.location.origin}/view/${secretId}`;
+
+        // 4. 替换页面里的链接和密码（关键：改静态HTML的值）
+        document.getElementById("shareLink").value = shareLink; // 改链接输入框
+        document.getElementById("generatedPasscode").value = showPass; // 改密码输入框
+
+        // 显示成功提示
+        document.getElementById("resultSection").classList.remove("d-none");
+        document.getElementById("aiReplyText").textContent = "双人秘密 创建成功！";
+
+        // 清空表单
+        document.getElementById("doubleSecret").value = "";
+        document.getElementById("doublePassA").value = "";
+        document.getElementById("doublePassB").value = "";
+        
+        // 关闭弹窗
+        bootstrap.Modal.getInstance(document.getElementById("doubleSecretModal")).hide();
+
+    } catch (err) {
+        console.error(err);
+        alert("创建失败");
+    }
+});
+
+    // ==============================================
+    // 情绪树洞（正常）
+    // ==============================================
     document.getElementById("saveTreeWhisperBtn").addEventListener("click", async () => {
         const content = document.getElementById("treeWhisper").value.trim();
         if (!content) return alert("请输入倾诉内容");
 
         try {
-            // 存储
             await fetch("/api/secret", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ secret: content, type: "tree" })
             });
-
-            // AI回复
             const aiRes = await fetch("/api/ai-reply", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ emotion: currentEmotion })
             });
             const data = await aiRes.json();
-
-            // 渲染
             addTreeItem(content, data.reply);
             alert("🌳 投递成功！");
             document.getElementById("treeWhisper").value = "";
@@ -365,8 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 加载历史树洞
-    loadTreeholes();
+    // 加载树洞
     async function loadTreeholes() {
         const res = await fetch("/api/treeholes");
         const list = await res.json();
@@ -376,8 +527,8 @@ document.addEventListener("DOMContentLoaded", () => {
             addTreeItem(item.content, "🌱 温柔的回响");
         });
     }
+    loadTreeholes();
 
-    // 渲染树洞
     function addTreeItem(content, reply) {
         const container = document.getElementById("publicTreeholeList");
         const div = document.createElement("div");
@@ -391,18 +542,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         container.prepend(div);
     }
-
-    // 时光胶囊（基础功能）
-    document.getElementById("saveCapsuleBtn").addEventListener("click", () => {
-        alert("✅ 时光胶囊已封存！");
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("timeCapsuleModal")).hide();
-    });
-
-    // 双人秘密（基础功能）
-    document.getElementById("saveDoubleSecretBtn").addEventListener("click", () => {
-        alert("✅ 双人秘密已创建！");
-        bootstrap.Modal.getOrCreateInstance(document.getElementById("doubleSecretModal")).hide();
-    });
 });
 </script>
 {% endblock %}

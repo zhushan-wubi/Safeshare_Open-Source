@@ -34,6 +34,15 @@ body {
     margin-top: 30px;
     margin-bottom: 30px;
 }
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
+}
+
+.card {
+    animation: float 4s ease-in-out infinite;
+}
 
 .card {
     background: rgba(255, 255, 255, 0.6) !important;
@@ -247,6 +256,9 @@ body[data-theme="anxious"] {
 body[data-theme="calm"] {
     background: linear-gradient(rgba(255, 230, 220, 0.85), rgba(220, 245, 230, 0.85));
 }
+body {
+    transition: background 0.8s ease;
+}
 /* 🤖 AI打字动画 */
 .ai-typing {
     overflow: hidden;
@@ -254,7 +266,6 @@ body[data-theme="calm"] {
     border-right: 2px solid #aaa;
     animation: typing 2s steps(30, end), blink 0.6s infinite;
 }
-
 @keyframes typing {
     from { width: 0 }
     to { width: 100% }
@@ -262,4 +273,14 @@ body[data-theme="calm"] {
 
 @keyframes blink {
     50% { border-color: transparent }
+}
+
+.ai-typing {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid #aaa;
+
+    width: 0;
+    animation: typing 2s steps(30, end) forwards,
+               blink 0.8s infinite;
 }

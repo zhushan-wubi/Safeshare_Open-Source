@@ -1,147 +1,144 @@
 {% extends "base.html" %}
 
-{% block title %}查看秘密 - SafeShare{% endblock %}
-
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-lg border-0">
-            <div class="card-header text-white py-3" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
-                <h4 class="mb-0"><i class="fas fa-lock-open me-2"></i>查看秘密</h4>
+<div class="container d-flex justify-content-center align-items-center min-vh-100" style="background-color: #ffeef4; padding: 20px;">
+    <div class="card shadow-lg p-4" style="max-width: 500px; width: 100%;">
+        <div class="card-header text-center bg-gradient-to-r from-pink-100 to-green-100 rounded-top">
+            <h3 class="mb-0">🔐 查看秘密</h3>
+        </div>
+        <div class="card-body text-center">
+            <!-- 密码输入区域 -->
+            <div id="passwordSection">
+                <p class="text-muted mb-4">请输入访问密码，查看后秘密将自动销毁</p>
+                <div class="mb-3">
+                    <input type="password" id="accessPasscode" class="form-control text-center" placeholder="请输入访问密码">
+                </div>
+                <button id="viewBtn" class="btn btn-primary w-100">查看秘密</button>
             </div>
-            <div class="card-body p-4">
-                <div class="alert alert-info border-0 mb-4" style="background-color: #f0e6ff;">
-                    <i class="fas fa-info-circle me-1"></i> 此秘密只能查看一次，查看后将被永久删除。
-                </div>
 
-                <div class="mb-4">
-                    <label for="viewPasscode" class="form-label fw-bold">
-                        <i class="fas fa-key me-1"></i> 输入访问密码
-                    </label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="viewPasscode" placeholder="请输入查看密码">
-                        <button class="btn btn-outline-secondary" type="button" id="toggleViewPassword">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <small class="text-muted">请输入分享者告诉你的密码</small>
-                </div>
+            <!-- 加载状态 -->
+            <div id="loadingSection" class="d-none">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <p class="text-muted">正在加载秘密...</p>
+            </div>
 
-                <div class="d-grid mb-4">
-                    <button id="viewSecretBtn" class="btn btn-lg py-3 text-white"
-                        style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
-                        <i class="fas fa-eye me-2"></i>查看秘密
-                    </button>
-                </div>
+            <!-- 错误提示区域 -->
+            <div id="errorSection" class="d-none">
+                <div class="alert alert-danger" id="errorText"></div>
+                <button id="retryBtn" class="btn btn-outline-secondary w-100 mt-3">重试</button>
+            </div>
 
-                <!-- 秘密内容区域 -->
-                <div id="secretContentSection" class="d-none">
-                    <hr>
-                    <h5 class="fw-bold mb-3"><i class="fas fa-scroll me-2"></i>秘密内容</h5>
-                    <div class="card bg-light border-0 mb-3">
-                        <div class="card-body">
-                            <div id="secretTextContent" class="secret-content"></div>
-                        </div>
-                    </div>
-                    <div class="alert alert-danger border-0">
-                        <h6 class="alert-heading"><i class="fas fa-exclamation-circle me-1"></i> 警告</h6>
-                        <p class="mb-2 small">此页面关闭后，秘密将无法再次查看。</p>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-outline-danger" onclick="copySecretContent()">
-                                <i class="fas fa-copy me-1"></i> 复制秘密内容
-                            </button>
-                            <button class="btn btn-outline-secondary" onclick="closeSecret()">
-                                <i class="fas fa-trash-alt me-1"></i> 销毁并关闭
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="errorSection" class="d-none">
-                    <div class="alert alert-danger border-0">
-                        <i class="fas fa-times-circle me-1"></i> <span id="errorMsg"></span>
-                    </div>
-                </div>
+            <!-- 秘密内容区域 -->
+            <div id="contentSection" class="d-none">
+                <h5 class="mb-3 text-muted">🌙 你的秘密</h5>
+                <div class="p-3 bg-light rounded text-start mb-4" id="secretContent"></div>
+                <!-- 动态提示文案：替换写死的"已销毁" -->
+                <p class="text-muted small text-center" id="expireTip">✨ 秘密已销毁，无法再次查看</p>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    // 从 URL 路径获取 secret_id
-    const secretId = window.location.pathname.split('/').pop();
+// 从URL获取秘密ID
+const urlParams = new URLSearchParams(window.location.search);
+const secretId = urlParams.get('key');
 
-    // 显示/隐藏密码
-    document.getElementById('toggleViewPassword').addEventListener('click', function() {
-        const input = document.getElementById('viewPasscode');
-        const type = input.type === 'password' ? 'text' : 'password';
-        input.type = type;
-        this.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-    });
+// 元素引用
+const passwordSection = document.getElementById('passwordSection');
+const loadingSection = document.getElementById('loadingSection');
+const errorSection = document.getElementById('errorSection');
+const contentSection = document.getElementById('contentSection');
+const errorText = document.getElementById('errorText');
+const secretContent = document.getElementById('secretContent');
+const passcodeInput = document.getElementById('accessPasscode');
+// 新增：动态提示文案元素
+const expireTip = document.getElementById('expireTip');
 
-    // 查看秘密
-    document.getElementById('viewSecretBtn').addEventListener('click', async function() {
-        const passcode = document.getElementById('viewPasscode').value.trim();
-        if (!passcode) {
-            SafeShare.showMessage('请输入密码', 'warning');
-            return;
-        }
+// 查看秘密核心逻辑（已修复+新增动态提示）
+document.getElementById('viewBtn').addEventListener('click', async () => {
+    const passcode = passcodeInput.value.trim();
+    if (!passcode) {
+        showError("请输入访问密码");
+        return;
+    }
 
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>验证中...';
+    passwordSection.classList.add('d-none');
+    loadingSection.classList.remove('d-none');
 
-        try {
-            const response = await fetch(`/api/secret/${secretId}?passcode=${encodeURIComponent(passcode)}`);
-            const data = await response.json();
+    try {
+        // 注意：secretId 要从 URL 路径获取，而非查询参数！
+       const pathParts = window.location.pathname.split('/');
+       const secretId = pathParts[pathParts.length - 1]; // 从 /view/xxx 中提取xxx
 
-            if (data.success) {
-                document.getElementById('secretTextContent').textContent = data.secret;
-                document.getElementById('secretContentSection').classList.remove('d-none');
-                // 隐藏输入区
-                document.querySelector('.alert-info').classList.add('d-none');
-                document.querySelector('.form-label').closest('.mb-4').classList.add('d-none');
-                document.querySelector('.input-group').closest('.mb-4').classList.add('d-none');
-                this.closest('.d-grid').classList.add('d-none');
-                SafeShare.showMessage('秘密已解锁', 'success');
+       const res = await fetch(`/api/secret/${secretId}`, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ passcode: passcode })
+        });
+        
+        // 必须先判断响应是否成功
+        if (!res.ok) throw new Error('网络请求失败');
+        
+        const data = await res.json();
+        loadingSection.classList.add('d-none');
+
+        if (data.success) {
+            // 成功显示内容 + 动态调整提示文案
+            secretContent.textContent = data.secret;
+            contentSection.classList.remove('d-none');
+            
+            // 核心修改：根据后端返回的过期模式显示不同提示
+            if (data.is_burn) {
+                // 阅后即焚模式 - 原提示
+                expireTip.textContent = "✨ 秘密已销毁，无法再次查看";
             } else {
-                document.getElementById('errorMsg').textContent = data.error || '验证失败';
-                document.getElementById('errorSection').classList.remove('d-none');
-                SafeShare.showMessage(data.error || '密码错误或秘密不存在', 'danger');
+                // 24h/7天模式 - 动态提示
+                expireTip.textContent = `✨ 该秘密${data.expire_text}有效，可重复查看`;
             }
-        } catch (err) {
-            document.getElementById('errorMsg').textContent = '网络错误，请重试';
-            document.getElementById('errorSection').classList.remove('d-none');
-            SafeShare.showMessage('网络错误', 'danger');
-        } finally {
-            this.disabled = false;
-            this.innerHTML = '<i class="fas fa-eye me-2"></i>查看秘密';
+        } else {
+            // 失败只提示错误，区分不同错误类型
+            let errMsg = data.error || "解锁失败";
+            // 适配后端返回的错误类型，显示精准提示
+            if (data.error_type === 'expired') {
+                errMsg = data.error; // 24h/7天过期提示
+            } else if (data.error_type === 'destroyed') {
+                errMsg = "秘密已销毁，无法再次查看"; // 阅后即焚销毁
+            } else if (data.error_type === 'not_unlock') {
+                errMsg = "⏳ 还没到解锁时间，暂时无法查看"; // 时光胶囊未到时间
+            } else if (data.error_type === 'pass_error') {
+                errMsg = "密码错误，请重新输入"; // 密码错误
+            }
+            
+            showError(errMsg);
+            passwordSection.classList.remove('d-none');
         }
-    });
-
-    function copySecretContent() {
-        const text = document.getElementById('secretTextContent').textContent;
-        SafeShare.copyToClipboard(text);
+    } catch (err) {
+        console.error(err);
+        loadingSection.classList.add('d-none');
+        showError("网络错误，请重试");
+        passwordSection.classList.remove('d-none');
     }
+});
 
-    function closeSecret() {
-        if (confirm('确定要销毁秘密吗？销毁后将无法恢复。')) {
-            document.getElementById('secretTextContent').textContent = '';
-            document.getElementById('secretContentSection').classList.add('d-none');
-            SafeShare.showMessage('秘密已销毁', 'success');
-        }
-    }
-</script>
+// 重试按钮
+document.getElementById('retryBtn').addEventListener('click', () => {
+    errorSection.classList.add('d-none');
+    passwordSection.classList.remove('d-none');
+    passcodeInput.value = "";
+});
 
-<style>
-.secret-content {
-    font-family: 'Courier New', monospace;
-    font-size: 1rem;
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 5px;
-    border-left: 4px solid #9b59b6;
+// 显示错误
+function showError(message) {
+    errorText.textContent = message;
+    errorSection.classList.remove('d-none');
 }
-</style>
+
+// 回车提交
+passcodeInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('viewBtn').click();
+    }
+});
+</script>
 {% endblock %}
