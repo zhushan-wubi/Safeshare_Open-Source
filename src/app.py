@@ -61,7 +61,8 @@ def create_secret():
     secret_type = data.get('type', 'tree')
     unlock_time = data.get('unlock_time')
     # 🔥 强制设置为24h模式（测试用）
-    expire_mode = '24h'  # 不管前端传什么，都用24h
+    # 取消硬编码，恢复动态获取
+    expire_mode = data.get('expire_mode', 'burn_after_read')  
     current_time = int(time.time() * 1000)
     expire_time = 0  # 默认阅后即焚
     
@@ -230,4 +231,7 @@ def ai_reply():
 # 🚀 启动（原有逻辑，无修改）
 # ==============================
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Render会自动分配端口，读取环境变量PORT
+    port = int(os.environ.get('PORT', 5000))
+    # 必须绑定0.0.0.0，否则Render无法访问
+    app.run(host='0.0.0.0', port=port, debug=False)
