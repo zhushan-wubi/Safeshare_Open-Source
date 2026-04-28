@@ -48,9 +48,69 @@ def index():
 def view(secret_id):
     return render_template('view.html')
 
+# ==============================
+# ✨ 新增：兼容前端/api/store接口（核心修复404）
+# 说明：不修改原有/api/secret，新增/api/store映射到原有逻辑
+# ==============================
+@app.route('/api/store', methods=['POST'])
+def store_secret():
+    # 1. 接收前端传的参数（适配前端的字段名）
+    data = request.json
+    secret_text = data.get('secret')
+    password = data.get('password')  # 前端传的是password
+    secret_type = data.get('type', 'normal')
+    unlock_time = data.get('unlock_time')
+    expire_mode = data.get('expiry_mode', 'burn_after_read')  # 前端传的是expiry_mode
+    expiry_hours = data.get('expiry_hours', 1)
+    
+    # 2. 转换为你原有代码的字段名（保证逻辑不变）
+    # 映射expiry_mode到expire_mode，兼容前端参数
+    expire_mode_map = {
+        'burn_after_read': 'burn_after_read',
+        '24h': '24h',
+        '7d': '7d'
+    }
+    final_expire_mode = expire_mode_map.get(expire_mode, 'burn_after_read')
+    
+    # 3. 复用你原有/create_secret的核心逻辑（完全不改动）
+    current_time = int(time.time() * 1000)
+    expire_time = 0  # 默认阅后即焚
+    
+    # 根据过期模式计算过期时间（复用你的逻辑）
+    if final_expire_mode == '24h':
+        expire_time = current_time + 24 * 60 * 60 * 1000  # 24小时后（毫秒）
+    elif final_expire_mode == '7d':
+        expire_time = current_time + 7 * 24 * 60 * 60 * 1000  # 7天后（毫秒）
+
+    if not secret_text:
+        return jsonify({'success': False, 'error': '内容不能为空'})
+
+    secret_id = str(uuid.uuid4())[:8]
+
+    # 存储数据（完全复用你的字段结构）
+    secrets[secret_id] = {
+        'secret': secret_text,
+        'passcode': password,  # 映射到你原有passcode字段
+        'type': secret_type,
+        'unlock_time': unlock_time,
+        'created': time.time(),
+        'is_deleted': False,
+        'expire_mode': final_expire_mode,  # 存储过期模式
+        'expire_time': expire_time   # 存储过期时间（毫秒级）
+    }
+
+    save_data()  # 💾 保存
+
+    # 4. 返回前端需要的格式（兼容前端接收id的逻辑）
+    return jsonify({
+        'success': True,
+        'id': secret_id,
+        # 保留你原有返回字段，保证兼容性
+        'error': None
+    })
 
 # ==============================
-# ✨ 创建秘密
+# ✨ 原有创建秘密接口（完全保留，不修改）
 # ==============================
 @app.route('/api/secret', methods=['POST'])
 def create_secret():
