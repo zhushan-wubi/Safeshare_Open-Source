@@ -274,15 +274,15 @@ def ai_reply():
     emotion = data.get("emotion", "calm")
 
     if emotion == "sad":
-        reply = "雨落在你心上，不需要急着撑伞。我会在这里，陪你慢慢等天晴。"
+        reply = "像下雨天坐在窗边。雨会停，但不用现在停 🤍"
     elif emotion == "happy":
-        reply = "听你开心，我也觉得今天的晚风会软一些。✨"
+        reply = "听你开心，我也觉得今天的晚风会软一些 ✨"
     elif emotion == "angry":
-        reply = "像石头砸进水面。愤怒的波纹会慢慢散去，但那一刻的真实，我看见了。"
+        reply = "像石头砸进水面。愤怒的波纹会慢慢散去，但那一刻的真实，我看见了 🔥"
     elif emotion == "anxious":
-        reply = "不用一下子走很远，我们一步一步来就好。"
+        reply = "慢慢走，我在这。快慢都没关系 🌿"
     else:
-        reply = "我在听，你可以慢慢说。"
+        reply = "心里的声音终于小下去了。值得为此停一分钟 ✨"
 
     return jsonify({"reply": reply})
 
