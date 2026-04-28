@@ -1,4 +1,4 @@
-Flask==2.3.3
+flask==2.3.3
 Werkzeug==2.3.7
 cryptography==41.0.7
 bcrypt==4.1.2
