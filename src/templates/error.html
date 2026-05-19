@@ -122,11 +122,11 @@
 
 {% block extra_js %}
 <script>
-// 页面加载完成
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ 错误页面已加载');
     
-    // 获取URL中的错误信息（如果有）
+
     const urlParams = new URLSearchParams(window.location.search);
     const errorCode = urlParams.get('code') || '{{ error_code|default("404", true) }}';
     const errorMessage = urlParams.get('message') || '{{ error_message|default("页面未找到", true) }}';
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.display-5').textContent = errorMessage;
 });
 
-// 简单的提示函数
+
 function showQuickMessage(message, type = 'info') {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
