@@ -1,20 +1,80 @@
- 莫奈的秘密花园 · Monet's Secret Garden
+# 🌿 莫奈的秘密花园 · Monet's Secret Garden
+> 一个本地优先（Local-first）的加密秘密花园  
+> 让秘密真正属于你，而不是服务器。
+> 不上传明文，不依赖云端，不需要注册。  
+> 用密码学守护秘密，用 AI 陪伴情绪。
+
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![Flask](https://img.shields.io/badge/Backend-Flask-black)
+![AES256](https://img.shields.io/badge/Encryption-AES256-green)
+![MIT](https://img.shields.io/badge/License-MIT-orange)
 🔗 在线体验：[https://safeshare-open-source.onrender.com/](https://safeshare-open-source.onrender.com/)
 <img width="2606" height="1555" alt="image" src="https://github.com/user-attachments/assets/9db49537-8261-447b-a35a-15fef7f5dfca" />
 
 📦 开源仓库：GitHub + Gitee 双平台同步 | 轻量本地加密秘密分享项目
-🔐 A local-first encrypted secret sharing system with emotional AI support.（本地优先的加密秘密分享系统，兼具情绪AI陪伴功能）
-🎯 What Problem Does This Solve?
-现有匿名/私密分享平台普遍存在核心痛点，无法满足隐私安全与权限管控需求：
-- ❌ 数据存储在云端服务器，存在被泄露、篡改的风险，隐私无法真正保障
-- ❌ 缺乏精细化权限控制，无法实现“多人共管、分权解锁”，单人管控风险过高
-- ❌ 多为“表面加密”，未实现真正的密码学加密，易被破解
-- ❌ 不支持离线使用，网络异常时无法访问私密内容
-👉 本项目提供的解决方案：
-✅ 【本地优先】所有数据本地加密存储，无任何云端明文上传，从源头杜绝泄露
-✅ 【加密可控】基于AES-256+SHA-256实现真正加密，支持多人分权解锁，权限可控
-✅ 【离线可用】核心功能脱离公网亦可正常使用，AI回复配备本地备用库
-✅ 【轻量易用】无需注册登录，一键部署，Web+CLI双入口，适配多场景使用
+## ✨ 为什么这个项目与众不同？
+大多数“匿名平台”其实并不真正匿名。
+你的秘密虽然被“加密”，  
+却依然：
+- 存放在平台服务器
+- 依赖中心化数据库
+- 受平台权限控制
+- 面临泄露与滥用风险
+Monet's Secret Garden 选择另一种方向：
+> 秘密属于用户，而不是平台。
+因此我们构建了一个：
+- 🔐 真正使用 AES-256 的本地加密系统
+- 📴 可离线运行的秘密存储方案
+- 👥 支持多人联合解锁的权限机制
+- ⏳ 支持阅后即焚与定时销毁
+- 🌱 具备 AI 情绪陪伴能力的匿名树洞
+它不仅是一个加密工具。
+更像是：
+> 数字时代里的私人情绪避风港。
+---
+
+# 📸 Preview
+
+## Web Interface
+
+<p align="center">
+  <img src="./assets/home.png" width="90%">
+</p>
+
+## Secret Creation
+
+<p align="center">
+  <img src="./assets/create.png" width="90%">
+</p>
+
+## CLI Demo
+
+```bash
+python cli.py create \
+  --content "Tomorrow 8PM." \
+  --password "primary_key" \
+  --second-password "secondary_key" \
+  --expire 24h
+
+🧠 Design Philosophy
+
+这个项目并不追求：
+社交传播
+用户增长
+数据收集
+
+我们更关注：
+情绪隐私
+本地控制权
+轻量化密码学
+无感知安全体验
+
+在大多数平台努力“获取更多数据”的时代，
+
+我们尝试：
+
+“尽可能少地知道用户信息。”
+
 ✨ Key Features | 核心功能
 - 🔐 Encrypted Secret Sharing（加密秘密分享）：支持自定义加密强度，生成加密分享链接，仅授权用户可查看
 - ⏳ Time-limited Access（时效控制）：阅后即焚、24小时有效、7天有效，过期自动销毁
