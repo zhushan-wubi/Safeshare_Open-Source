@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <!-- 顶部标题区 -->
+
     <div class="text-center mb-5">
         <h1>🌿 莫奈的秘密花园</h1>
         <p class="lead">把心事藏进油画里，让温柔守护你的秘密</p>
@@ -14,12 +14,11 @@
         </div>
     </div>
 
-    <!-- 温馨提示 -->
+
     <div class="alert alert-light border rounded-4 text-center mb-5">
         <i class="fa fa-info-circle me-2"></i> 所有秘密仅存储在你的设备中，绝对安全，无需担心泄露
     </div>
 
-    <!-- 秘密分享 -->
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0"><i class="fa fa-paper-plane me-2"></i> 创建你的私密分享</h5>
@@ -37,7 +36,7 @@
                     </div>
                 </div>
                 <label class="form-label fw-bold">✍️ 写下你的秘密 / 心事 / 寄语</label>
-                <!-- 新增：隐私保护开关 -->
+
                 <div class="form-check mb-2">
                     <input class="form-check-input" type="checkbox" id="privacyProtect" checked>
                     <label class="form-check-label" for="privacyProtect">🔒 开启隐私保护（敏感信息自动打码）</label>
@@ -84,7 +83,7 @@
         </div>
     </div>
 
-    <!-- 分享结果 -->
+
     <div id="resultSection" class="d-none card">
         <div class="card-header bg-success text-white">
             <h5 class="mb-0"><i class="fa fa-check-circle me-2"></i> 链接创建成功</h5>
@@ -93,7 +92,7 @@
             <div class="mb-4 p-3 bg-light rounded">
                 <p class="text-muted small mb-1">🌙 温柔回复</p>
                 <p id="aiReplyText" class="text-dark"></p>
-                <!-- 新增：情绪标签展示 -->
+  
                 <p class="text-muted small mt-2" id="emotionTag"></p>
             </div>
 
@@ -115,7 +114,7 @@
         </div>
     </div>
 
-    <!-- 特色功能 -->
+
     <div class="feature-section text-center mt-5">
         <h2 class="mb-4"><i class="fa fa-leaf me-2"></i> 花园小筑 · 特色功能</h2>
         <p class="text-muted mb-5">三种温柔方式，安放你的所有情绪</p>
@@ -148,7 +147,7 @@
         </div>
     </div>
 
-    <!-- 树洞展示 -->
+
     <div class="treehole-feed">
         <h2><i class="fa fa-comment-o me-2"></i> 匿名心声墙</h2>
         <p class="text-muted mb-4">这里藏着大家的温柔心事</p>
@@ -158,7 +157,7 @@
     </div>
 </div>
 
-<!-- 时光胶囊弹窗 -->
+
 <div class="modal fade" id="timeCapsuleModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -169,7 +168,7 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label fw-bold">胶囊内容</label>
-                    <!-- 新增：隐私保护开关 -->
+
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="capsulePrivacyProtect" checked>
                         <label class="form-check-label" for="capsulePrivacyProtect">🔒 开启隐私保护</label>
@@ -194,7 +193,7 @@
     </div>
 </div>
 
-<!-- 双人秘密弹窗 -->
+
 <div class="modal fade" id="doubleSecretModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -205,7 +204,7 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label fw-bold">秘密内容</label>
-                    <!-- 新增：隐私保护开关 -->
+
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="doublePrivacyProtect" checked>
                         <label class="form-check-label" for="doublePrivacyProtect">🔒 开启隐私保护</label>
@@ -230,7 +229,7 @@
     </div>
 </div>
 
-<!-- 情绪树洞弹窗 -->
+
 <div class="modal fade" id="emotionTreeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -241,7 +240,7 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label fw-bold">倾诉内容</label>
-                    <!-- 新增：隐私保护开关 -->
+
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="treePrivacyProtect" checked>
                         <label class="form-check-label" for="treePrivacyProtect">🔒 开启隐私保护</label>
@@ -269,36 +268,34 @@
 
 {% block extra_js %}
 <script>
-// 全局情绪
+
 let currentEmotion = "calm";
 
-// 敏感信息正则规则（只用于生成打码文本，不修改用户输入）
+
 const sensitivePatterns = {
     phone: /1[3-9]\d{9}/g, // 手机号
     idCard: /\d{17}[\dXx]|\d{15}/g, // 身份证
     email: /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/g, // 邮箱
-    address: /[省市县区镇街道]\d+号/g // 地址（简单匹配）
+    address: /[省市县区镇街道]\d+号/g // 地址（
 };
 
-// 生成打码后的文本（只用于提交时处理，不修改用户输入）
+
 function getMaskedText(text) {
     let maskedText = text;
 
-    // 手机号打码：138****1234
     if (sensitivePatterns.phone.test(maskedText)) {
         maskedText = maskedText.replace(sensitivePatterns.phone, (match) => {
             return match.slice(0,3) + "****" + match.slice(7);
         });
     }
 
-    // 身份证打码：110***********1234
     if (sensitivePatterns.idCard.test(maskedText)) {
         maskedText = maskedText.replace(sensitivePatterns.idCard, (match) => {
             return match.slice(0,3) + "***********" + match.slice(-4);
         });
     }
 
-    // 邮箱打码：x**x@xxx.com
+
     if (sensitivePatterns.email.test(maskedText)) {
         maskedText = maskedText.replace(sensitivePatterns.email, (match) => {
             const [user, domain] = match.split('@');
@@ -307,7 +304,7 @@ function getMaskedText(text) {
         });
     }
 
-    // 地址打码：北京市****号
+
     if (sensitivePatterns.address.test(maskedText)) {
         maskedText = maskedText.replace(sensitivePatterns.address, (match) => {
             const addrMatch = match.match(/([省市县区镇街道])(\d+号)/);
@@ -319,7 +316,7 @@ function getMaskedText(text) {
     return maskedText;
 }
 
-// 绑定隐私保护开关的提示
+
 function bindPrivacyToggle(checkboxId, warningId) {
     const checkbox = document.getElementById(checkboxId);
     const warning = document.getElementById(warningId);
@@ -334,7 +331,7 @@ function bindPrivacyToggle(checkboxId, warningId) {
     });
 }
 
-// 复制函数
+
 function copyToClipboard(id) {
     const input = document.getElementById(id);
     input.select();
@@ -343,15 +340,14 @@ function copyToClipboard(id) {
         .catch(() => alert("❌ 复制失败"));
 }
 
-// 统一显示结果（所有秘密共用，增强：展示情绪标签+个性化AI回复）
 function showSecretResult(link, pass, title, content = "") {
     document.getElementById("resultSection").classList.remove("d-none");
     document.getElementById("shareLink").value = link;
     document.getElementById("generatedPasscode").value = pass;
-    // 生成个性化AI回复
+
     const aiReply = generateAIReply(currentEmotion, content);
     document.getElementById("aiReplyText").textContent = aiReply;
-    // 显示情绪标签
+
     const emotionLabels = {
         happy: "😊 开心",
         sad: "😢 难过",
@@ -360,17 +356,15 @@ function showSecretResult(link, pass, title, content = "") {
         calm: "🌱 平静"
     };
     document.getElementById("emotionTag").textContent = `情绪标签：${emotionLabels[currentEmotion]}`;
-    
-    // 清空所有表单
+
     document.getElementById("secretText").value = "";
     document.getElementById("passcode").value = "";
     document.getElementById("confirmPasscode").value = "";
     document.getElementById("charCount").textContent = "0";
 }
 
-// 本地备用AI回复（增强：关联输入内容）
 function generateAIReply(emotion, content = "") {
-    // 基础情绪回复
+
     const baseReplies = {
         happy: [
             "听你开心，我也觉得今天的晚风会软一些 🌼",
@@ -399,7 +393,6 @@ function generateAIReply(emotion, content = "") {
         ]
     };
 
-    // 根据内容关键词增强回复
     const contentKeywords = {
         "考研|考试|复习": {
             happy: "备考的辛苦都有了回报，太棒啦 📚",
@@ -434,7 +427,7 @@ function generateAIReply(emotion, content = "") {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 绑定所有隐私保护开关的提示
+
     bindPrivacyToggle('privacyProtect', 'privacyWarning');
     bindPrivacyToggle('capsulePrivacyProtect', 'capsulePrivacyWarning');
     bindPrivacyToggle('doublePrivacyProtect', 'doublePrivacyWarning');
@@ -463,9 +456,6 @@ document.addEventListener("DOMContentLoaded", () => {
         input.type = input.type === "password" ? "text" : "password";
     });
 
-    // ==============================================
-    // 1. 普通秘密分享（核心修改：根据开关状态决定是否打码）
-    // ==============================================
     document.getElementById("generateBtn").addEventListener("click", async function() {
         const secret = document.getElementById("secretText").value.trim();
         const pass = document.getElementById("passcode").value;
@@ -481,7 +471,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // 根据开关状态决定提交的文本
         const submitText = protect ? getMaskedText(secret) : secret;
 
         try {
@@ -504,7 +493,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // 生成 /view/xxx 格式链接
             const shareLink = `${window.location.origin}/view/${data.id}`;
             
-            // 增强：传递内容给AI回复
+
             showSecretResult(shareLink, pass, "普通秘密", secret);
 
         } catch (err) {
@@ -513,9 +502,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ==============================================
-    // 2. 时光胶囊（核心修改：根据开关状态决定是否打码）
-    // ==============================================
     document.getElementById("saveCapsuleBtn").addEventListener("click", async function() {
         const content = document.getElementById("capsuleSecret").value.trim();
         const pass = document.getElementById("capsulePass").value.trim();
@@ -536,7 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const submitText = protect ? getMaskedText(content) : content;
 
         try {
-            // 转换解锁时间为时间戳（后端需要）
+
             const unlockTime = new Date(unlockDate).getTime();
             
             // 调用后端创建时光胶囊
@@ -575,9 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ==============================================
-    // 3. 双人秘密（核心修改：根据开关状态决定是否打码）
-    // ==============================================
+
     document.getElementById("saveDoubleSecretBtn").addEventListener("click", async function() {
         const content = document.getElementById("doubleSecret").value.trim();
         const passA = document.getElementById("doublePassA").value.trim();
@@ -622,15 +606,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const secretId = data.id;
             const shareLink = `${window.location.origin}/view/${secretId}`;
 
-            // 增强：传递内容给AI回复
+
             showSecretResult(shareLink, showPass, "双人秘密", content);
 
-            // 清空表单
+
             document.getElementById("doubleSecret").value = "";
             document.getElementById("doublePassA").value = "";
             document.getElementById("doublePassB").value = "";
             
-            // 关闭弹窗
+
             bootstrap.Modal.getInstance(document.getElementById("doubleSecretModal")).hide();
 
         } catch (err) {
@@ -639,15 +623,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ==============================================
-    // 情绪树洞（核心修改：根据开关状态决定是否打码）
-    // ==============================================
+
     document.getElementById("saveTreeWhisperBtn").addEventListener("click", async () => {
         const content = document.getElementById("treeWhisper").value.trim();
         const protect = document.getElementById("treePrivacyProtect").checked;
         if (!content) return alert("请输入倾诉内容");
 
-        // 根据开关状态决定提交的文本
+
         const submitText = protect ? getMaskedText(content) : content;
 
         try {
@@ -656,13 +638,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ secret: submitText, type: "tree" })
             });
-            // 增强：传递内容给AI回复接口
+
             const aiRes = await fetch("/api/ai-reply", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     emotion: currentEmotion,
-                    content: content // 传递原始内容给AI回复
+                    content: content 
                 })
             });
             const data = await aiRes.json();
@@ -671,13 +653,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("treeWhisper").value = "";
             bootstrap.Modal.getOrCreateInstance(document.getElementById("emotionTreeModal")).hide();
         } catch (err) {
-            // 增强：传递内容生成本地回复
             addTreeItem(content, generateAIReply(currentEmotion, content));
             alert("⚠️ 网络异常，使用本地回复");
         }
     });
 
-    // 加载树洞
+
     async function loadTreeholes() {
         const res = await fetch("/api/treeholes");
         const list = await res.json();
