@@ -6,39 +6,35 @@ import logging
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import requests
 
-# ==============================
-# 基础配置
-# ==============================
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'monet-secret-garden-2025'
 
-# 日志配置
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# 过期模式配置（毫秒）
+
 EXPIRE_MODES = {
-    'burn_after_read': 0,    # 阅后即焚
-    '24h': 24 * 60 * 60 * 1000,  # 24小时
-    '7d': 7 * 24 * 60 * 60 * 1000, # 7天
-    'permanent': 0  # 永久（仅树洞使用）
+    'burn_after_read': 0,    
+    '24h': 24 * 60 * 60 * 1000,  
+    '7d': 7 * 24 * 60 * 60 * 1000, 
+    'permanent': 0  
 }
 
-# 数据存储文件
+
 DATA_FILE = 'secrets.json'
 
-# 通义千问API配置（AI隐私检测）
+
 DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "")
 DASHSCOPE_URL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation"
 
-# ==============================
-# 数据读写工具函数
-# ==============================
+
 def load_data():
-    """加载存储的秘密数据"""
+
     try:
         if os.path.exists(DATA_FILE):
             with open(DATA_FILE, 'r', encoding='utf-8') as f:
@@ -49,7 +45,7 @@ def load_data():
         return {}
 
 def save_data(data=None):
-    """保存秘密数据到文件"""
+
     try:
         save_data = data if data else secrets
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
@@ -58,53 +54,46 @@ def save_data(data=None):
     except Exception as e:
         logger.error(f"保存数据失败: {e}")
 
-# 初始化秘密存储
 secrets = load_data()
 
-# ==============================
-# 页面路由
-# ==============================
+
 @app.route('/')
 def index():
-    """首页：创建秘密"""
+
     return render_template('index.html')
 
 @app.route('/view/<secret_id>')
 def view_secret(secret_id):
-    """查看秘密页面"""
+
     return render_template('view.html', secret_id=secret_id)
 
-# ==============================
-# API接口
-# ==============================
+
 @app.route('/api/secret', methods=['POST'])
 def create_secret():
-    """创建新秘密"""
+
     try:
         data = request.json or {}
         secret_text = data.get('secret', '').strip()
         passcode = data.get('passcode', '').strip()
-        secret_type = data.get('type', 'normal')  # normal/time/double/tree
+        secret_type = data.get('type', 'normal')  
         unlock_time = data.get('unlock_time', 0)
         expire_mode = data.get('expire_mode', 'burn_after_read')
 
         if not secret_text:
             return jsonify({'success': False, 'error': '秘密内容不能为空'}), 400
 
-        # 🌳 树洞强制永久保留，不参与任何过期/销毁
         current_time = int(time.time() * 1000)
-        
-        # 单独处理：情绪树洞 永久不过期、永不删除
+
         if secret_type == "tree":
             expire_mode = "permanent"
             expire_time = 0
             is_deleted = False
         else:
-            # 其他类型正常走过期规则
+
             expire_time = current_time + EXPIRE_MODES[expire_mode] if EXPIRE_MODES[expire_mode] > 0 else 0
             is_deleted = False
 
-        # 生成秘密ID并存储
+
         secret_id = str(uuid.uuid4())[:8]
         secrets[secret_id] = {
             'secret': secret_text,
@@ -117,7 +106,7 @@ def create_secret():
             'expire_time': expire_time
         }
 
-        # 保存数据到文件
+
         save_data()
         logger.info(f"创建新秘密: {secret_id} (类型: {secret_type})")
 
@@ -139,22 +128,22 @@ def get_secret(secret_id):
         passcode = data.get('passcode', '').strip()
         current_time = int(time.time() * 1000)
         
-        # 1. 检查秘密是否存在
+
         if secret_id not in secrets:
             return jsonify({'success': False, 'error': '秘密不存在', 'error_type': 'not_exist'}), 404
         
         secret = secrets[secret_id]
-        # 修复：定义secret_type变量
+
         secret_type = secret.get('type', 'normal')
         
-        # 2. 检查是否已被删除
+
         if secret.get('is_deleted', False):
             return jsonify({'success': False, 'error': '秘密已销毁，无法再次查看', 'error_type': 'destroyed'}), 410
         
         expire_mode = secret.get('expire_mode', 'burn_after_read')
         expire_time = secret.get('expire_time', 0)
         
-        # 3. 检查过期时间（非阅后即焚模式、非树洞）
+
         if expire_mode != 'burn_after_read' and expire_mode != 'permanent' and expire_time > 0 and current_time > expire_time:
             secrets[secret_id]['is_deleted'] = True
             save_data()
@@ -165,7 +154,7 @@ def get_secret(secret_id):
                 'error_type': 'expired'
             }), 410
         
-        # 4. 时光胶囊：检查解锁时间
+
         if secret_type == 'time':
             unlock_time = secret.get('unlock_time')
             if unlock_time and current_time < int(unlock_time):
@@ -175,7 +164,7 @@ def get_secret(secret_id):
                     'error_type': 'not_unlock'
                 }), 403
         
-        # 5. 双人秘密：验证密码
+
         if secret_type == 'double':
             stored_pass = secret.get('passcode', '').strip()
             passcodes = stored_pass.split("|")
@@ -190,13 +179,13 @@ def get_secret(secret_id):
             if passcode not in (valid_pass1, valid_pass2):
                 return jsonify({'success': False, 'error': '密码错误', 'error_type': 'pass_error'}), 401
         
-        # 6. 普通秘密：验证密码（只有非树洞类型才验证）
+
         elif secret_type != "tree":
             stored_pass = secret.get('passcode', '').strip()
             if stored_pass and passcode != stored_pass:
                 return jsonify({'success': False, 'error': '密码错误', 'error_type': 'pass_error'}), 401
         
-        # 7. 阅后即焚处理（树洞永久保留，不销毁）
+
         secret_content = secret['secret']
         if expire_mode == 'burn_after_read' and secret_type != "tree":
             secrets[secret_id]['is_deleted'] = True
@@ -209,7 +198,7 @@ def get_secret(secret_id):
                 'is_burn': True
             }), 200
         
-        # 8. 定时过期模式/永久模式
+
         if expire_mode == 'permanent':
             expire_text = '永久有效'
         else:
@@ -230,9 +219,9 @@ def get_secret(secret_id):
 
 @app.route('/api/treeholes', methods=['GET'])
 def get_treeholes():
-    """获取所有树洞内容（永久保留）"""
+
     try:
-        # 筛选出所有未删除的树洞
+
         treeholes = []
         for secret_id, secret in secrets.items():
             if secret.get('type') == 'tree' and not secret.get('is_deleted', False):
@@ -242,7 +231,7 @@ def get_treeholes():
                     'created': secret['created']
                 })
         
-        # 按创建时间排序（最新的在前）
+
         treeholes.sort(key=lambda x: x['created'], reverse=True)
         return jsonify(treeholes), 200
     
@@ -252,13 +241,12 @@ def get_treeholes():
 
 @app.route('/api/ai-reply', methods=['POST'])
 def ai_reply():
-    """AI回复接口（本地备用）"""
+
     try:
         data = request.json or {}
         emotion = data.get('emotion', 'calm')
         content = data.get('content', '')
-        
-        # 基础情绪回复库
+
         base_replies = {
             "happy": [
                 "听你开心，我也觉得今天的晚风会软一些 🌼",
@@ -289,7 +277,7 @@ def ai_reply():
         
         # 随机选一个回复
         replies = base_replies.get(emotion, base_replies['calm'])
-        reply = replies[len(replies) // 2]  # 取中间的回复，更稳定
+        reply = replies[len(replies) // 2] 
         
         return jsonify({'success': True, 'reply': reply}), 200
     
@@ -297,9 +285,6 @@ def ai_reply():
         logger.error(f"AI回复失败: {e}")
         return jsonify({'success': True, 'reply': '🌱 温柔的回响'}), 200
 
-# ==============================
-# AI隐私检测接口（可选）
-# ==============================
 @app.route('/ai/privacy-detect', methods=['POST'])
 def ai_privacy_detect():
     """AI识别文本中的隐私信息并打码（通义千问）"""
@@ -309,7 +294,6 @@ def ai_privacy_detect():
         if not text:
             return jsonify({"masked_text": text, "has_sensitive": False}), 200
 
-        # 通义千问提示词
         prompt = f"""
         你是一个隐私保护助手，请识别以下文本中的所有隐私信息并打码：
         1. 手机号、身份证、邮箱、地址、微信号、QQ号等
@@ -319,7 +303,6 @@ def ai_privacy_detect():
         文本：{text}
         """
 
-        # 调用通义千问API
         headers = {
             "Authorization": f"Bearer {DASHSCOPE_API_KEY}",
             "Content-Type": "application/json"
@@ -335,7 +318,6 @@ def ai_privacy_detect():
         result = response.json()
         output = result["output"]["text"]
 
-        # 解析模型返回的JSON
         import json as json_lib
         parsed = json_lib.loads(output)
         return jsonify({
@@ -345,12 +327,10 @@ def ai_privacy_detect():
 
     except Exception as e:
         logger.error(f"AI隐私检测失败: {e}")
-        # API失败时自动降级，返回原文本
+
         return jsonify({"masked_text": text, "has_sensitive": False}), 200
 
-# ==============================
-# 启动服务
-# ==============================
+
 if __name__ == '__main__':
     # 确保数据文件目录存在
     if not os.path.exists(os.path.dirname(DATA_FILE)) and os.path.dirname(DATA_FILE):
