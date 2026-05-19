@@ -1,4 +1,4 @@
-// 🌈 当前情绪
+
 let currentEmotion = "calm";
 const quotes = [
     "今天也在被温柔地接住 🌿",
@@ -9,7 +9,7 @@ const quotes = [
 document.getElementById("welcomeText").innerText =
     quotes[Math.floor(Math.random() * quotes.length)];
 
-// 🧠 AI温柔回复系统（备用）
+
 function generateAIReply(emotion, text) {
     const replies = {
         happy: ["听到你的开心，我也忍不住笑了 🌼"],
@@ -23,21 +23,20 @@ function generateAIReply(emotion, text) {
     return list[Math.floor(Math.random() * list.length)];
 }
 
-// 📋 复制
+
 function copyText(text) {
     navigator.clipboard.writeText(text)
         .then(() => alert("✅ 已复制！直接打开链接即可查看"))
         .catch(() => alert("❌ 复制失败"));
 }
 
-// ✨ 核心：重新触发打字动画（关键修复）
 function triggerTypingEffect(element) {
     element.style.animation = 'none';
-    element.offsetHeight; // 强制重绘（必须）
+    element.offsetHeight; 
     element.style.animation = null;
 }
 
-// 🎨 初始化CSS动画样式（自动注入，不用手动改CSS文件）
+
 function initTypingCSS() {
     const style = document.createElement('style');
     style.textContent = `
@@ -74,10 +73,10 @@ function initTypingCSS() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 初始化打字动画样式
+   
     initTypingCSS();
 
-    // 🌈 情绪选择
+    
     document.querySelectorAll(".emotion-btn").forEach(btn => {
         btn.addEventListener("click", function () {
             currentEmotion = this.dataset.emotion;
@@ -91,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // ✍️ 字数统计
+
     const textarea = document.getElementById("secretText");
     const count = document.getElementById("charCount");
 
@@ -101,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 👁️ 密码显示
+
     const toggleBtn = document.getElementById("togglePassword");
     if (toggleBtn) {
         toggleBtn.addEventListener("click", () => {
@@ -110,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🚀 生成分享链接（✅ 修复：从radio按钮获取过期模式）
+
     const generateBtn = document.getElementById("generateBtn");
 
     if (generateBtn) {
@@ -120,8 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const pass = document.getElementById("passcode").value;
             const confirm = document.getElementById("confirmPasscode").value;
 
-            // 🕒 修复：从radio按钮获取过期模式（匹配index.html的radio）
-            let expireMode = 'burn_after_read'; // 默认阅后即焚
+
+            let expireMode = 'burn_after_read'; 
             const selectedExpiry = document.querySelector('input[name="expiry"]:checked');
             if (selectedExpiry) {
                 expireMode = selectedExpiry.dataset.mode || 'burn_after_read';
@@ -137,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // ✅ 调用后端生成真实ID（传递过期模式）
             fetch('/api/secret', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -145,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     secret: secret,
                     passcode: pass,
                     type: "normal",
-                    expire_mode: expireMode // 传递过期模式给后端
+                    expire_mode: expireMode 
                 })
             })
             .then(res => res.json())
@@ -159,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const id = data.id;
                 const link = `${window.location.origin}/view/${id}`;
 
-                // 传递过期模式到结果展示
                 showResult(secret, link, expireMode);
 
             })
@@ -170,7 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ⏳ 时光胶囊（✅ 修复：从radio按钮获取过期模式）
     const saveCapsuleBtn = document.getElementById("saveCapsuleBtn");
     if (saveCapsuleBtn) {
         saveCapsuleBtn.addEventListener("click", () => {
@@ -178,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const pass = document.getElementById("capsulePass").value || "";
             const date = document.getElementById("capsuleDate").value;
 
-            // 🕒 修复：从radio按钮获取过期模式
             let expireMode = 'burn_after_read';
             const selectedExpiry = document.querySelector('input[name="expiry"]:checked');
             if (selectedExpiry) {
@@ -215,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const link = `${window.location.origin}/view/${id}`;
                 showResult(content, link, expireMode);
                 
-                // 关闭弹窗
+
                 const modal = bootstrap.Modal.getInstance(document.getElementById("timeCapsuleModal"));
                 if (modal) modal.hide();
             })
@@ -226,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 👥 双人秘密（✅ 修复：从radio按钮获取过期模式）
+
     const saveDoubleSecretBtn = document.getElementById("saveDoubleSecretBtn");
     if (saveDoubleSecretBtn) {
         saveDoubleSecretBtn.addEventListener("click", () => {
@@ -234,7 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const passA = document.getElementById("doublePassA").value;
             const passB = document.getElementById("doublePassB").value;
 
-            // 🕒 修复：从radio按钮获取过期模式
             let expireMode = 'burn_after_read';
             const selectedExpiry = document.querySelector('input[name="expiry"]:checked');
             if (selectedExpiry) {
@@ -250,9 +244,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // ✅ 存储用 | 分隔，显示给用户的是纯拼接（无加号/空格）
             const doublePass = passA + "|" + passB; 
-            const showPass = passA + passB; // 纯拼接密码
+            const showPass = passA + passB; 
 
             fetch('/api/secret', {
                 method: 'POST',
@@ -261,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     secret: content,
                     passcode: doublePass,
                     type: "double",
-                    expire_mode: expireMode // 传递过期模式给后端
+                    expire_mode: expireMode 
                 })
             })
             .then(res => res.json())
@@ -273,8 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const id = data.id;
                 const link = `${window.location.origin}/view/${id}`;
                 
-                // 显示结果（密码为纯拼接格式 + 过期模式）
-                // 修复：7天有效匹配后端的7天
+
                 const expireText = expireMode === 'burn_after_read' ? '阅后即焚' : 
                                    expireMode === '24h' ? '24小时有效' : '7天有效';
                 const resultBox = document.createElement("div");
@@ -304,11 +296,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 resultBox.querySelector(".copy-pass-btn").onclick = () => copyText(showPass);
                 resultBox.querySelector(".close-btn").onclick = () => resultBox.remove();
                 
-                // ✨ 触发打字动画
+
                 const typingBox = resultBox.querySelector(".typing-text");
                 triggerTypingEffect(typingBox);
                 
-                // 清空表单 + 关闭弹窗
+
                 document.getElementById("doubleSecret").value = "";
                 document.getElementById("doublePassA").value = "";
                 document.getElementById("doublePassB").value = "";
@@ -322,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🌳 树洞功能
+
     const treeBtn = document.getElementById("saveTreeWhisperBtn");
 
     if (treeBtn) {
@@ -382,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🌱 加载历史树洞（优化：不覆盖情绪）
+
     fetch('/api/treeholes')
         .then(res => res.json())
         .then(list => {
@@ -394,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// 🌳 渲染树洞（✅ 修复情绪混乱bug + 打字动画）
+
 function addTreeHole(content, aiReply, emotion = currentEmotion) {
 
     const list = document.getElementById("publicTreeholeList");
@@ -416,17 +408,16 @@ function addTreeHole(content, aiReply, emotion = currentEmotion) {
 
     list.prepend(div);
     
-    // ✨ 触发打字动画
+
     const typingBox = div.querySelector(".typing-text");
     triggerTypingEffect(typingBox);
 }
 
 
-// 🌸 分享结果（通用：普通秘密/时光胶囊 + 打字动画 + 过期模式）
 function showResult(secret, link, expireMode = 'burn_after_read') {
 
     const aiReply = generateAIReply(currentEmotion, secret);
-    // 修复：7天有效匹配后端的7天
+
     const expireText = expireMode === 'burn_after_read' ? '阅后即焚' : 
                        expireMode === '24h' ? '24小时有效' : '7天有效';
 
@@ -459,11 +450,11 @@ function showResult(secret, link, expireMode = 'burn_after_read') {
     box.querySelector(".copy-btn").onclick = () => copyText(link);
     box.querySelector(".close-btn").onclick = () => box.remove();
 
-    // ✨ 触发打字动画
+
     const typingBox = box.querySelector(".typing-text");
     triggerTypingEffect(typingBox);
 
-    // 清空表单
+
     if (document.getElementById("secretText")) document.getElementById("secretText").value = "";
     if (document.getElementById("passcode")) document.getElementById("passcode").value = "";
     if (document.getElementById("confirmPasscode")) document.getElementById("confirmPasscode").value = "";
