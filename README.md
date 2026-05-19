@@ -1,5 +1,7 @@
-莫奈的秘密花园 · Monet's Secret Garden
+ 莫奈的秘密花园 · Monet's Secret Garden
 🔗 在线体验：[https://safeshare-open-source.onrender.com/](https://safeshare-open-source.onrender.com/)
+![Uploading image.png…]()
+
 📦 开源仓库：GitHub + Gitee 双平台同步 | 轻量本地加密秘密分享项目
 🔐 A local-first encrypted secret sharing system with emotional AI support.（本地优先的加密秘密分享系统，兼具情绪AI陪伴功能）
 🎯 What Problem Does This Solve?
