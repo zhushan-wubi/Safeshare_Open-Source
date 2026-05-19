@@ -7,7 +7,7 @@
             <h3 class="mb-0">🔐 查看秘密</h3>
         </div>
         <div class="card-body text-center">
-            <!-- 密码输入区域 -->
+
             <div id="passwordSection">
                 <p class="text-muted mb-4">请输入访问密码，查看后秘密将自动销毁</p>
                 <div class="mb-3">
@@ -16,23 +16,23 @@
                 <button id="viewBtn" class="btn btn-primary w-100">查看秘密</button>
             </div>
 
-            <!-- 加载状态 -->
+
             <div id="loadingSection" class="d-none">
                 <div class="spinner-border text-primary mb-3" role="status"></div>
                 <p class="text-muted">正在加载秘密...</p>
             </div>
 
-            <!-- 错误提示区域 -->
+
             <div id="errorSection" class="d-none">
                 <div class="alert alert-danger" id="errorText"></div>
                 <button id="retryBtn" class="btn btn-outline-secondary w-100 mt-3">重试</button>
             </div>
 
-            <!-- 秘密内容区域 -->
+
             <div id="contentSection" class="d-none">
                 <h5 class="mb-3 text-muted">🌙 你的秘密</h5>
                 <div class="p-3 bg-light rounded text-start mb-4" id="secretContent"></div>
-                <!-- 动态提示文案：替换写死的"已销毁" -->
+
                 <p class="text-muted small text-center" id="expireTip">✨ 秘密已销毁，无法再次查看</p>
             </div>
         </div>
@@ -52,10 +52,9 @@ const contentSection = document.getElementById('contentSection');
 const errorText = document.getElementById('errorText');
 const secretContent = document.getElementById('secretContent');
 const passcodeInput = document.getElementById('accessPasscode');
-// 新增：动态提示文案元素
+
 const expireTip = document.getElementById('expireTip');
 
-// 查看秘密核心逻辑（已修复+新增动态提示）
 document.getElementById('viewBtn').addEventListener('click', async () => {
     const passcode = passcodeInput.value.trim();
     if (!passcode) {
@@ -67,9 +66,9 @@ document.getElementById('viewBtn').addEventListener('click', async () => {
     loadingSection.classList.remove('d-none');
 
     try {
-        // 注意：secretId 要从 URL 路径获取，而非查询参数！
+    
        const pathParts = window.location.pathname.split('/');
-       const secretId = pathParts[pathParts.length - 1]; // 从 /view/xxx 中提取xxx
+       const secretId = pathParts[pathParts.length - 1];
 
        const res = await fetch(`/api/secret/${secretId}`, {
            method: 'POST',
@@ -84,16 +83,15 @@ document.getElementById('viewBtn').addEventListener('click', async () => {
         loadingSection.classList.add('d-none');
 
         if (data.success) {
-            // 成功显示内容 + 动态调整提示文案
+
             secretContent.textContent = data.secret;
             contentSection.classList.remove('d-none');
-            
-            // 核心修改：根据后端返回的过期模式显示不同提示
+
             if (data.is_burn) {
-                // 阅后即焚模式 - 原提示
+
                 expireTip.textContent = "✨ 秘密已销毁，无法再次查看";
             } else {
-                // 24h/7天模式 - 动态提示
+
                 expireTip.textContent = `✨ 该秘密${data.expire_text}有效，可重复查看`;
             }
         } else {
