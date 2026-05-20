@@ -49,17 +49,17 @@ Monet's Secret Garden 选择另一种方向：
 
 ## CLI Demo
 
-# 1. 创建秘密
+1. 创建秘密
 python cli.py create --content "涉密内容" --password "primary_key" --second-password "secondary_key" --expire 24h
-# 2. 解密查看（单密码/双密码验证）
+2. 解密查看（单密码/双密码验证）
 python cli.py read --secret-id "xxx-xxx-xxx" --password "primary_key" --second-password "secondary_key"
-# 3. 清理过期数据（自动删除所有过期秘密）
+3. 清理过期数据（自动删除所有过期秘密）
 python cli.py clean
-# 4. 查看本地加密数据列表（显示所有秘密ID、创建时间、过期时间）
+4. 查看本地加密数据列表（显示所有秘密ID、创建时间、过期时间）
 python cli.py list
-# 5. 导出加密数据（备份用，导出为加密JSON文件）
+5. 导出加密数据（备份用，导出为加密JSON文件）
 python cli.py export --path "./backup/secret_backup.json"
-# 6. 查看帮助（获取所有命令及参数说明）
+6. 查看帮助（获取所有命令及参数说明）
 python cli.py --help
 
 
