@@ -172,6 +172,8 @@ def verify_password(input_pwd, stored_hash):
 - 🧠 Personal：私密情绪日记、时光胶囊、隐私内容封存
 
 ## 📂 Project Structure
+
+```text
 .
 ├── app.py              # 后端入口
 ├── cli.py              # 命令行工具
@@ -183,13 +185,21 @@ def verify_password(input_pwd, stored_hash):
 ├── templates/          # 前端页面模板
 ├── static/             # 静态资源
 └── data/               # 本地加密数据存储目录
+└── assets/             # README 图片资源
+```
+
 
 ## ⭐ Why This Project?
 💡 1. 隐私安全扎实：本地优先架构+真正的AES-256加密，技术细节可查，非“表面加密”，符合开源安全评审标准；
+
 💡 2. 开源友好度高：Web+CLI双入口，项目结构清晰，提供完整部署文档、代码注释，支持二次开发与集成；
+
 💡 3. 场景适配性强：贴合校园、小团队、个人等多场景，可快速改造为信安赛窄场景，无需重构核心代码；
+
 💡 4. 特色差异化：治愈系视觉风格+硬核安全设计，区别于普通开源项目，易在评审中脱颖而出；
+
 💡 5. 可扩展性强：开发路线清晰，支持Shamir秘密共享、Docker部署等升级方向，体现项目长期价值。
+
 
 ## 📄 License（开源协议）
 MIT License
