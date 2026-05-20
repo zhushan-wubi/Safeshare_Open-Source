@@ -63,7 +63,7 @@ python cli.py export --path "./backup/secret_backup.json"
 python cli.py --help
 
 
-🧠 Design Philosophy
+## 🧠 Design Philosophy
 
 这个项目并不追求：
 社交传播
@@ -82,7 +82,7 @@ python cli.py --help
 
 “尽可能少地知道用户信息。”
 
-✨ Key Features | 核心功能
+## ✨ Key Features | 核心功能
 - 🔐 Encrypted Secret Sharing（加密秘密分享）：支持自定义加密强度，生成加密分享链接，仅授权用户可查看
 - ⏳ Time-limited Access（时效控制）：阅后即焚、24小时有效、7天有效，过期自动销毁
 - 👥 Multi-key Authorization（多密钥授权）：支持双人分权解锁，适配团队、校园场景
@@ -164,13 +164,14 @@ def verify_password(input_pwd, stored_hash):
 - Scheduled Cleanup（定时清理）：后台定时扫描，自动销毁过期数据，释放本地存储资源
 
 👉 支持脚本化调用，可集成到其他工具中，提升项目实用性与开源价值。
-👥 Use Cases
+
+## 👥 Use Cases
 - 🧑‍💻 Developers：本地加密分享工具，用于存储、分享敏感配置、密钥等
 - 🎓 Campus：匿名反馈、涉密文稿管控、实训口令分发、学生组织机密托管
 - 👥 Small Teams：多人共管秘密、项目核心方案保密、权限分级管控
 - 🧠 Personal：私密情绪日记、时光胶囊、隐私内容封存
 
-📂 Project Structure
+## 📂 Project Structure
 .
 ├── app.py              # 后端入口
 ├── cli.py              # 命令行工具
@@ -183,16 +184,19 @@ def verify_password(input_pwd, stored_hash):
 ├── static/             # 静态资源
 └── data/               # 本地加密数据存储目录
 
-⭐ Why This Project?
+## ⭐ Why This Project?
 💡 1. 隐私安全扎实：本地优先架构+真正的AES-256加密，技术细节可查，非“表面加密”，符合开源安全评审标准；
 💡 2. 开源友好度高：Web+CLI双入口，项目结构清晰，提供完整部署文档、代码注释，支持二次开发与集成；
 💡 3. 场景适配性强：贴合校园、小团队、个人等多场景，可快速改造为信安赛窄场景，无需重构核心代码；
 💡 4. 特色差异化：治愈系视觉风格+硬核安全设计，区别于普通开源项目，易在评审中脱颖而出；
 💡 5. 可扩展性强：开发路线清晰，支持Shamir秘密共享、Docker部署等升级方向，体现项目长期价值。
-📄 License（开源协议）
+
+## 📄 License（开源协议）
 MIT License
 本项目为学生开源学习项目，仅用于技术学习、学术交流、校园实践（信安赛、课程设计），严禁商用盈利。二次开发请保留项目开源声明及作者信息。
-👥 开发团队
+
+## 👥 开发团队
 3人协作开源维护，持续迭代优化加密逻辑、界面体验与CLI管理功能，长期保持项目活跃度，适配开源安全奖励计划“持续维护”评审要求，可提供完整开发日志与提交记录。
-🌿 项目寄语
+
+## 🌿 项目寄语
 以密码学构筑隐私港湾，以技术守护细碎心事；让轻量化民用加密技术走进校园日常，让每一份私密倾诉都有安全归宿，助力开源安全普及与校园安全建设。
