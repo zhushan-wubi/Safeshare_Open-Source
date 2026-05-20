@@ -5,6 +5,7 @@ import os
 import logging
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import requests
+from emotion_ai import generate_reply
 
 
 app = Flask(__name__)
