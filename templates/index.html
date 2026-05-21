@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monet Secret Garden</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+
+    <!-- 第一屏 -->
+    <section class="hero">
+
+        <div id="bg"></div>
+
+        <div class="overlay"></div>
+
+        <div class="hero-content">
+            <h1>Monet's Secret Garden</h1>
+
+            <p>Where Art Hides Encryption</p>
+
+            <div class="scroll-tip">
+                Scroll to Enter ↓
+            </div>
+        </div>
+
+    </section>
+
+    <!-- 第二屏 -->
+    <section class="main-page">
+
+        <div class="glass-box">
+
+            <h2>AI Security Space</h2>
+
+            <textarea placeholder="Input your secret..."></textarea>
+
+            <div class="buttons">
+                <button>Encrypt</button>
+                <button>AI Analyze</button>
+            </div>
+
+            <div class="result-box">
+                AI analysis will appear here...
+            </div>
+
+        </div>
+
+    </section>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
