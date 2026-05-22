@@ -472,6 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const submitText = protect ? getMaskedText(secret) : secret;
+        const selectedMode = document.querySelector('input[name="expiry"]:checked').dataset.mode;
 
         try {
             const res = await fetch("/api/secret", {
@@ -480,7 +481,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({
                     secret: submitText,
                     passcode: pass,
-                    type: "normal"
+                    type: "normal",
+                    expire_mode: selectedMode,
+                    expiry_mode: selectedMode
                 })
             });
             const data = await res.json();
