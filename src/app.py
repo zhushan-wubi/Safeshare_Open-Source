@@ -78,7 +78,8 @@ def create_secret():
         passcode = data.get('passcode', '').strip()
         secret_type = data.get('type', 'normal')  
         unlock_time = data.get('unlock_time', 0)
-        expire_mode = data.get('expire_mode', 'burn_after_read')
+        # 仅此处做兼容修改，接收前端双字段，解决过期模式识别失效
+        expire_mode = data.get('expire_mode') or data.get('expiry_mode') or 'burn_after_read'
 
         if not secret_text:
             return jsonify({'success': False, 'error': '秘密内容不能为空'}), 400
