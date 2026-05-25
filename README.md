@@ -39,16 +39,9 @@ Monet's Secret Garden 选择另一种方向：
 ## Web Interface
 <img width="2085" height="1426" alt="image" src="https://github.com/user-attachments/assets/cacba96a-440d-48e6-b5ee-60ed6abdd426" />
 
-<p align="center">
-  <img src="./assets/home.png" width="90%">
-</p>
 
 ## Secret Creation
 <img width="2015" height="808" alt="image" src="https://github.com/user-attachments/assets/3a92dd33-c755-4039-a8fa-3868396d00f9" />
-
-<p align="center">
-  <img src="./assets/create.png" width="90%">
-</p>
 
 ## CLI Demo
 
