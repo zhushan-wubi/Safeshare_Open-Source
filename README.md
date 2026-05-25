@@ -107,13 +107,17 @@ Security:
   - SHA-256 Hash
   - Shamir Secret Sharing
   - TTL Expiration Mechanism
-🔐 Security Design
+## 🔐 Security Design
 拒绝“文案加密”，所有安全机制均有具体技术实现，可直接查看代码验证：
-1. Content Encryption
-- Algorithm：AES-256 对称加密
-- Mode：每条秘密独立加密，避免单密钥泄露导致批量数据泄露
-- IV：随机生成，提升加密强度，符合民用级安全标准
-- Core Code Snippet：
+
+---
+
+### 1. Content Encryption（内容加密）
+- **Algorithm（算法）**: AES-256 对称加密
+- **Mode（模式）**: 每条秘密独立加密，避免单密钥泄露导致批量数据泄露
+- **IV（偏移向量）**: 随机生成，提升加密强度，符合民用级安全标准
+
+```python
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
@@ -137,10 +141,12 @@ def aes_decrypt(encrypted_data, key):
     # 解密并去除补位
     decrypted_content = unpad(cipher.decrypt(ciphertext), AES.block_size).decode('utf-8')
     return decrypted_content
+```
 2. Password Protection（密码保护）
 - Storage Mode（存储方式）：密码以SHA-256 Hash值存储，不存储任何明文密码
 - Advantage（优势）：即使本地数据被获取，也无法逆向破解密码，保障访问安全
 - Core Code Snippet（核心代码片段）：
+```python
 import hashlib
 
 def hash_password(password):
@@ -150,6 +156,7 @@ def hash_password(password):
 def verify_password(input_pwd, stored_hash):
     # 验证密码：将输入密码Hash后与存储的Hash值比对
     return hash_password(input_pwd) == stored_hash
+```
 3. Access Control（访问控制）
 - Basic Mode（基础模式）：密码 gated 解密，仅输入正确密码可查看内容
 - Advanced Mode（进阶模式）：多密钥双重验证，支持双人/多人联合解锁
