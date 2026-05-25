@@ -9,7 +9,8 @@
 ![AES256](https://img.shields.io/badge/Encryption-AES256-green)
 ![MIT](https://img.shields.io/badge/License-MIT-orange)
 🔗 在线体验：[https://safeshare-open-source.onrender.com/](https://safeshare-open-source.onrender.com/)
-<img width="2606" height="1555" alt="image" src="https://github.com/user-attachments/assets/9db49537-8261-447b-a35a-15fef7f5dfca" />
+<img width="2570" height="1508" alt="image" src="https://github.com/user-attachments/assets/7a2fc801-18c8-48f6-9558-aa6fabd5e6aa" />
+
 
 📦 开源仓库：GitHub + Gitee 双平台同步 | 轻量本地加密秘密分享项目
 ## ✨ 为什么这个项目与众不同？
@@ -36,12 +37,14 @@ Monet's Secret Garden 选择另一种方向：
 # 📸 Preview
 
 ## Web Interface
+<img width="2085" height="1426" alt="image" src="https://github.com/user-attachments/assets/cacba96a-440d-48e6-b5ee-60ed6abdd426" />
 
 <p align="center">
   <img src="./assets/home.png" width="90%">
 </p>
 
 ## Secret Creation
+<img width="2015" height="808" alt="image" src="https://github.com/user-attachments/assets/3a92dd33-c755-4039-a8fa-3868396d00f9" />
 
 <p align="center">
   <img src="./assets/create.png" width="90%">
